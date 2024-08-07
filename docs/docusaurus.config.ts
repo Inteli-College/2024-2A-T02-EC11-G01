@@ -1,111 +1,89 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { lightCodeTheme, darkCodeTheme } from 'prism-react-renderer';
 
-const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
-  favicon: 'img/favicon.ico',
+const organizationName = '2024-2A-T02-EC11-G01';
+
+/** @type {import('@docusaurus/types').Config} */
+const config = {
+  title: 'Artemis',
+  tagline: 'Restaurando o futuro do planeta agora',
+  favicon: 'icons/inteli.png',
 
   // Set the production url of your site here
-  url: 'https://inteli-college.github.io',
+  url: `https://${organizationName}.github.io`,
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/2024-2A-T02-EC11-G01/',
+  baseUrl: `/${organizationName}/`,
+
+  projectName: '2024-2A-T02-EC11-G01',
+  organizationName: organizationName,
+  trailingSlash: false,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'G1', // Usually your GitHub org/user name.
-  projectName: '2024-T0002-EC09-G01 ', // Usually your repo name.
-
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: 'br',
+    locales: ['br'],
   },
 
   presets: [
     [
       'classic',
-      {
+      /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+      ({
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          routeBasePath: '/'
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        },
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
-      } satisfies Preset.Options,
+      }),
     ],
   ],
 
-  themeConfig: {
+  themeConfig:
+  /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+  ({
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    // image: 'img/backgroud.jpg',
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
+    },
     navbar: {
-      title: 'My Site',
+      title: 'Artemis | Restaurando o futuro do planeta agora',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        alt: 'logo',
+        src: 'icons/logo-eng-comp.png',
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {
-          href: 'https://github.com/Inteli-College/2024-2A-T02-EC11-G01',
-          label: 'Github',
-          position: 'right',
+          to: "https://github.com/Inteli-College/2024-2A-T02-EC11-G01",
+          position: "right",
+          className: "header-github-link",
+          "aria-label": "GitHub repository",
         },
       ],
     },
     footer: {
       style: 'dark',
-      links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Tutorial',
-              to: '/docs/intro',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/Inteli-College/2024-2A-T02-EC11-G01',
-            },
-          ],
-        },
-      ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Artemis Inc.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
     },
-  } satisfies Preset.ThemeConfig,
+    markdown: {
+      mermaid: true,
+    },    
+  }),
 };
 
 export default config;
