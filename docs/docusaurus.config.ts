@@ -15,7 +15,7 @@ const config = {
   baseUrl: `/${organizationName}/`,
 
   projectName: '2024-2A-T02-EC11-G01',
-  organizationName: organizationName,
+  organizationName: 'docs',
   trailingSlash: false,
 
   // GitHub pages deployment config.
