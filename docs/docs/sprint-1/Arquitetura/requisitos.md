@@ -10,7 +10,18 @@ Para garantir que o projeto atenda às necessidades do cliente foram elicitados 
 
 ## Requisitos Funcionais
 
+Os requisitos funcionas são funcionalidades que o sistema deve possuir para atingir que o sistema seja capaz de desempenhar suas funções e atenda às necessidades do cliente. Eles descrevem as ações que o sistema deve ser capaz de realizar, como a captura de imagens, processamento de dados e exibição de resultados. Abaixo estão listados os requisitos funcionais elicitados.
 
+| Categoria                  | Requisito                                                                                      |
+|----------------------------|------------------------------------------------------------------------------------------------|
+| Captura de Imagens          | O sistema deve permitir que o drone capture imagens aéreas das áreas de floresta. |
+| Processamento de Imagens    | O sistema deve processar as imagens capturadas localmente no drone para identificar e contar o número de árvores. |
+| Processamento de Imagens    | O sistema deve ser capaz de tomar a decisão de tirar outra foto baseado no resultado do modelo embarcado no drone |
+| Transmissão de Dados        | O sistema deve transmitir os resultados da contagem de árvores e a imagem obtida, sempre que houver conectividade. |
+| Armazenamento de Dados      | O sistema deve armazenar de forma segura todos os dados capturados e processados, incluindo imagens e resultados da contagem. |
+| Processamento de Imagens    | o resultado inicial do modelo embarcado deve ser validado por um modelo na nuvem mais preciso |
+| Segurança                   | O sistema deve permitir que apenas usuários autenticados acessem os dados e controlem os drones, utilizando o Firebase para autenticação. |
+| Usabilidade                 | O sistema deve fornecer uma interface intuitiva para que os usuários possam visualizar os dados de contagem de árvores e os resultados processados. |
 
 ## Requisitos Não Funcionais
 
