@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 use std::process::Command;
+use chrono;
 
 use v4l::buffer::Type;
 use v4l::io::traits::CaptureStream;
@@ -25,8 +26,8 @@ fn main() -> io::Result<()> {
     let mut stream = MmapStream::with_buffers(&dev, Type::VideoCapture, buffer_count)?;
 
     // Prepare the output path in the home directory
-    let home_dir = std::env::var("HOME").unwrap();
-    let output_path = format!("{}/output_video.mp4", home_dir);
+    let current_dir = std::env::current_dir().unwrap();
+    let output_path = format!("{}/images/{}.mp4", current_dir.display(), chrono::prelude::Utc::now());
 
     // Start an ffmpeg process to encode the video stream to MP4
     let mut ffmpeg = Command::new("ffmpeg")
