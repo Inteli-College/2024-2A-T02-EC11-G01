@@ -1,0 +1,1 @@
+Repository for computer vision: https://github.com/raymanfx/libv4l-rs
