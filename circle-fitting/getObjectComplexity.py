@@ -1,24 +1,26 @@
-import numpy as np
 import cv2
-from skimage.morphology import skeletonize, binary_closing, disk, remove_small_objects
-from skimage.measure import label, regionprops, find_contours
-from scipy.ndimage import distance_transform_edt as bwdist
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.ndimage import distance_transform_edt as bwdist
+from skimage.measure import find_contours, label, regionprops
+from skimage.morphology import binary_closing, disk, remove_small_objects, skeletonize
+
 
 def getObjectComplexity(A):
+    print("Start getObjectComplexity")
     toPlot = 0
     B = np.zeros((A.shape[0] + 6, A.shape[1] + 6))
     B[3:-3, 3:-3] = A
     A = B
 
     # Skeletonize and distance transform
-   
-    SK = skeletonize(A).astype(np.uint8)
-    BW = bwdist(1 - A)
+
+    SK = skeletonize(A).astype(np.float64)
+    BW = bwdist(A)
     BD = SK * BW
     all_zeros_BD = not np.any(BD)
     all_zeros_SK = not np.any(SK)
-    breakpoint()
+    # breakpoint()
     AInit = A
 
     # Compute average branch length and set radius for morphological closing
@@ -32,12 +34,12 @@ def getObjectComplexity(A):
         A = binary_closing(A, se)
 
     SK = skeletonize(A).astype(np.uint8)
-    BW = bwdist(1 - A)
+    BW = bwdist(A)
     BD = SK * BW
     all_zeros = not np.any(SK)
     # Find points of interest
     Points = np.column_stack(np.where(BD > 0))
-    breakpoint()
+    # breakpoint()
     S = find_contours(A, 0.5)
     Sarea = np.sqrt(np.count_nonzero(A))
     Degree = []
@@ -63,9 +65,10 @@ def getObjectComplexity(A):
     EP_points = np.column_stack(np.where(EP))
 
     for pt in BP_points:
-        print(len(W0))
         distances = np.sum((Points - pt) ** 2, axis=1)
-        close_idx = np.where(distances <= max(2 + 0.00 * Sarea, 0.00 * np.max(W0) ** 2))[0]
+        close_idx = np.where(
+            distances <= max(2 + 0.00 * Sarea, 0.00 * np.max(W0) ** 2)
+        )[0]
         if close_idx.size > 0:
             ite += 1
             LM.append(close_idx[0])
@@ -74,7 +77,9 @@ def getObjectComplexity(A):
 
     for pt in EP_points:
         distances = np.sum((Points - pt) ** 2, axis=1)
-        close_idx = np.where(distances <= max(2 + 0.00 * Sarea, 0.00 * np.max(W0) ** 2))[0]
+        close_idx = np.where(
+            distances <= max(2 + 0.00 * Sarea, 0.00 * np.max(W0) ** 2)
+        )[0]
         if close_idx.size > 0:
             ite += 1
             LM.append(close_idx[0])
@@ -85,15 +90,18 @@ def getObjectComplexity(A):
     n2 = getShannonComplexity(Points, LM, W0, Degree)
 
     if toPlot == 1:
-        cmap = plt.get_cmap('jet', 256)
-        cmap.set_under(color='white')
+        cmap = plt.get_cmap("jet", 256)
+        cmap.set_under(color="white")
         plt.imshow(BD + AInit, cmap=cmap)
         for i, u in enumerate(LM):
-            plt.text(Points[u][1], Points[u][0], f'{i+1}', color='red')
-        plt.title(f' S = {n2:.2f}   Graph size = {n} - Circles = {Circles} Points = {ite}')
+            plt.text(Points[u][1], Points[u][0], f"{i+1}", color="red")
+        plt.title(
+            f" S = {n2:.2f}   Graph size = {n} - Circles = {Circles} Points = {ite}"
+        )
         plt.show()
 
     return max(n2, 1)
+
 
 def getShannonComplexity(Points, LM, W0, Degree):
     n_points = len(Points)
@@ -153,7 +161,9 @@ def getShannonComplexity(Points, LM, W0, Degree):
 
     for i in range(len(unique_L1)):
         for j in range(len(unique_L2)):
-            vec = np.where((Label[:, 0] == unique_L1[i]) & (Label[:, 1] == unique_L2[j]))[0]
+            vec = np.where(
+                (Label[:, 0] == unique_L1[i]) & (Label[:, 1] == unique_L2[j])
+            )[0]
             if len(vec) > 1:
                 W1 = W0[vec]
                 W = np.floor(N * (W1 - Rmin) / (0.00000000001 + Rmax - Rmin)) + 1
@@ -163,4 +173,6 @@ def getShannonComplexity(Points, LM, W0, Degree):
                 Pr = Pr / np.sum(Pr)
                 n2[i, j] = -np.sum(Pr * np.log2(Pr + 0.00000000001))
 
+    print("Finish getObjectComplexity")
     return np.sum(n2) + np.log2(len(Points) + 0.0000001)
+

@@ -1,10 +1,11 @@
 import numpy as np
 
+from getBestFitEllipses import getBestFitEllipses
 from getOX import getOX
 
-from getBestFitEllipses import getBestFitEllipses
 
 def runEllClustering(EL, IClust, area):
+    print("Start runEllClustering")
     IClustNew = IClust.copy()
     lines, cols = IClust.shape
     NUMEllipses = len(EL)
@@ -21,11 +22,11 @@ def runEllClustering(EL, IClust, area):
                 if IClust[i, j] > 0:
                     d = np.zeros(NUMEllipses)
                     for k in range(NUMEllipses):
-                        OAdist = np.linalg.norm([j, i] - np.array(EL[k]['C']))
-                        ratio = OAdist / max(EL[k]['a'], 0.00001)
+                        OAdist = np.linalg.norm([j, i] - np.array(EL[k]["C"]))
+                        ratio = OAdist / max(EL[k]["a"], 0.00001)
 
                         if ratio > Thresh_D:
-                            OXdist = (EL[k]['a'] + EL[k]['b']) / 2
+                            OXdist = (EL[k]["a"] + EL[k]["b"]) / 2
                         else:
                             OXdist = getOX([j, i], EL[k])
 
@@ -37,13 +38,19 @@ def runEllClustering(EL, IClust, area):
                         changes += 1
                     IClustNew[i, j] = pos + 1
 
-        Thresh_D = Dtemp[int(lines / 3):int(2 * lines / 3), int(cols / 3):int(2 * cols / 3)].max() + 0.1
+        Thresh_D = (
+            Dtemp[
+                int(lines / 3) : int(2 * lines / 3), int(cols / 3) : int(2 * cols / 3)
+            ].max()
+            + 0.1
+        )
 
         EL, _, TotalPerf = getBestFitEllipses(IClustNew, EL, NUMEllipses, area)
 
         if changes / area < 0.001 or ite > 50:
-            print(f'changes = {changes} ite = {ite}')
+            print(f"changes = {changes} ite = {ite}")
             break
 
-    print('TotalPerf:', TotalPerf)
+    print("Finish runEllClustering")
     return EL, IClustNew, Dtemp, TotalPerf
+

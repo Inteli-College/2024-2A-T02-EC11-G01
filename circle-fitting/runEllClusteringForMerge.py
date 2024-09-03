@@ -5,6 +5,7 @@ from getOX import getOX
 
 
 def runEllClusteringForMerge(EL, ELLSET, IClust, area):
+    print("Start runEllClusteringForMerge")
     INF = 1e18
     IClustNew = IClust.copy()
     lines, cols = IClust.shape
@@ -97,4 +98,5 @@ def getBestFitEllipseForMerge(I, EL, val):
     EL[val]['Label'] = val
 
     p = {x[0] + lines * cols * x[1] for x in p1}
+    print("Finish runEllClusteringForMerge")
     return EL, area, p

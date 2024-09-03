@@ -1,6 +1,7 @@
 import numpy as np
 
 def getOX(p, el):
+    print("Start getOX")
     # Extrai os parâmetros da elipse
     a = el['a']
     b = el['b']
@@ -22,4 +23,5 @@ def getOX(p, el):
 
     # Calcula a distância OX
     OXdist = np.linalg.norm([x1, y1])
+    print("Finish getOX")
     return OXdist

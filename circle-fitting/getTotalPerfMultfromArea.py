@@ -1,4 +1,5 @@
 def getTotalPerfMultfromArea(EL, SET, areaLim):
+    print("Start getTotalPerfMultfromArea")
     minArea = EL[SET[0]]['InArea']
     maxArea = 0
 
@@ -16,4 +17,5 @@ def getTotalPerfMultfromArea(EL, SET, areaLim):
     if g < 0.1:
         rate = 0.01  # Pode ser ajustado com base em rate * (g / 0.1) ** 2
 
+    print("Finish getTotalPerfMultfromArea")
     return rate
