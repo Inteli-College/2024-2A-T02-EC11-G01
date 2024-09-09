@@ -3,6 +3,8 @@ label: "Modelos de IA"
 sidebar_position: 2
 ---
 
+# Modelos de IA
+
 Neste documento, apresentamos uma análise comparativa dos modelos desenvolvidos durante a Sprint 2, sendo dois modelos de deep learning utilizados para a contagem automática de árvores em imagens de satélite e aéreas: YOLO (You Only Look Once) e DeepForest. A contagem precisa de árvores é essencial para diversas aplicações, como monitoramento ambiental, gestão florestal, e estimativas de biomassa. Cada modelo oferece vantagens distintas e apresenta diferentes desafios em termos de precisão, velocidade, e aplicabilidade. A seguir, detalharemos as características técnicas de ambos os modelos para orientar na escolha do mais adequado para o nosso cenário de uso.
 
 ## Modelo YOLO (You Only Look Once)
@@ -38,4 +40,4 @@ DeepForest é um modelo de deep learning especializado, desenvolvido especificam
 ## Conclusão
 A análise comparativa entre YOLO e DeepForest levou em consideração a velocidade, versatilidade e precisão exigidas pelo projeto de contagem de árvores. Apesar da velocidade e flexibilidade oferecidas pelo YOLO, optamos por utilizar o DeepForest como o modelo principal. Essa escolha foi baseada em uma avaliação de imagens, como é possível observar abaixo, onde o DeepForest demonstrou maior assertividade na detecção e contagem de árvores, especialmente em cenários complexos. 
 
-![Modelo Deep Forest](../../../static/img/imagem-modelo-deep-forest.png)
+![Modelo Deep Forest](../../static/img/imagem-modelo-deep-forest.jpeg)
