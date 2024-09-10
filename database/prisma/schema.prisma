@@ -7,23 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Locations {
-  location_id  String        @id @default(uuid()) @db.Uuid
+model locations {
+  location_id  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   coordinate_x String
   coordinate_y Json
-  Predictions  Predictions[]
-
-  @@map("Locations")
+  predictions  predictions[]
 }
 
-model Predictions {
-  prediction_id     String    @id @default(uuid()) @db.Uuid
+model predictions {
+  prediction_id     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   raw_image_path    String
   output_image_path String?
   output            Json?
   location_id       String    @db.Uuid
-  Locations         Locations @relation(fields: [location_id], references: [location_id])
-
-  @@map("Predictions")
+  locations         locations @relation(fields: [location_id], references: [location_id])
 }
