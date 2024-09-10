@@ -6,3 +6,24 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Locations {
+  location_id  String        @id @default(uuid()) @db.Uuid
+  name         String
+  coordinate_x String
+  coordinate_y Json
+  Predictions  Predictions[]
+
+  @@map("Locations")
+}
+
+model Predictions {
+  prediction_id     String    @id @default(uuid()) @db.Uuid
+  raw_image_path    String
+  output_image_path String?
+  output            Json?
+  location_id       String    @db.Uuid
+  Locations         Locations @relation(fields: [location_id], references: [location_id])
+
+  @@map("Predictions")
+}

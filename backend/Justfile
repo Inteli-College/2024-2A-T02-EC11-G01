@@ -1,0 +1,10 @@
+[private]
+default:
+  @just --choose
+
+infra option='':
+  @just --justfile ../Justfile infra "{{option}}"
+
+app:
+  @go mod tidy
+  @go run ./cmd/app/main.go
