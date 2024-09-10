@@ -1,3 +1,9 @@
+---
+id: Embarcado
+title: Embarcado
+sidebar_position: 3
+---
+
 # Embarcado
 
 ## Utilizando a câmera no sistema embarcado
