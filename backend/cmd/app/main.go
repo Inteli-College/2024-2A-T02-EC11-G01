@@ -1,70 +1,40 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"os"
-	"time"
+	"log"
+
+	_ "github.com/Inteli-College/2024-1B-T02-EC10-G04/docs"
+	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-// TODO: Refactor all of this
-
-// Message is what greeters will use to greet guests.
-type Message string
-
-// NewMessage creates a default Message.
-func NewMessage(phrase string) Message {
-	return Message(phrase)
-}
-
-// NewGreeter initializes a Greeter. If the current epoch time is an even
-// number, NewGreeter will create a grumpy Greeter.
-func NewGreeter(m Message) Greeter {
-	var grumpy bool
-	if time.Now().Unix()%2 == 0 {
-		grumpy = true
-	}
-	return Greeter{Message: m, Grumpy: grumpy}
-}
-
-// Greeter is the type charged with greeting guests.
-type Greeter struct {
-	Grumpy  bool
-	Message Message
-}
-
-// Greet produces a greeting for guests.
-func (g Greeter) Greet() Message {
-	if g.Grumpy {
-		return Message("Go away!")
-	}
-	return g.Message
-}
-
-// NewEvent creates an event with the specified greeter.
-func NewEvent(g Greeter) (Event, error) {
-	if g.Grumpy {
-		return Event{}, errors.New("could not create event: event greeter is grumpy")
-	}
-	return Event{Greeter: g}, nil
-}
-
-// Event is a gathering with greeters.
-type Event struct {
-	Greeter Greeter
-}
-
-// Start ensures the event starts with greeting all guests.
-func (e Event) Start() {
-	msg := e.Greeter.Greet()
-	fmt.Println(msg)
-}
-
+// @title Location API
+// @version 1.0
+// @description API for managing locations.
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
-	e, err := InitializeEvent("hi there!")
+	// Inicializa a conexão com o banco de dados
+	db, err := gorm.Open(postgres.Open("host=localhost user=youruser dbname=yourdb password=yourpassword sslmode=disable"), &gorm.Config{})
 	if err != nil {
-		fmt.Printf("failed to create event: %s\n", err)
-		os.Exit(2)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	e.Start()
+
+	// Inicializa o handler usando Wire
+	locationHandler := InitializeLocationHandler(db)
+
+	// Inicializa o router Gin
+	r := gin.Default()
+
+	// Configura o Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Configura os endpoints da API
+	apiGroup := r.Group("/api/v1")
+	locationHandler.RegisterRoutes(apiGroup)
+
+	// Inicia o servidor
+	r.Run(":8080")
 }
