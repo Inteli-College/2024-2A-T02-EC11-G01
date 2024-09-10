@@ -1,16 +1,20 @@
 package entity
 
 type Prediction struct {
-	Id         string
-	Image     string
-	Detections  string
+	PredictionId    *string "json:\"prediction_id\""
+	RawImagePath    *string "json:\"raw_image_path\""
+	OutputImagePath *string "json:\"output_image_path\""
+	Output          *string "json:\"output\""
+	LocationId      *string "json:\"location_id\""
 }
 
-func NewPrediction(id string, image string, detections string) *Prediction {
+func NewPrediction(predictionId string, rawImagePath string, outputImagePath string, output string, locationId string) *Prediction {
 	return &Prediction{
-		Id:         id,
-		Image:      image,
-		Detections: detections,
+		PredictionId:    &predictionId,
+		RawImagePath:    &rawImagePath,
+		OutputImagePath: &outputImagePath,
+		Output:          &output,
+		LocationId:      &locationId,
 	}
 }
 
