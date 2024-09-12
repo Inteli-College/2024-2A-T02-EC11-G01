@@ -47,8 +47,15 @@ As legendas abaixo referem-se a cada parte do diagrama:
 
 ## Fluxo da aplicação
 
-Preparamos um fluxo da aplicação para que haja o entendimento completo dos processos que ocorrem na aplicação. Para isso, utilizamos o Figma para a criação do diagrama:
+Preparamos um fluxo da aplicação para que haja o entendimento completo dos processos que ocorrem na aplicação.
+O diagrama do fluxo mostra a interação entre os diferentes componentes do sistema Para isso, utilizamos o Figma para a criação do diagrama:
 
 ![Protótipo do fluxo](../../static/img/Fluxo.jpeg)
+
+- Frontend: A interface com o usuário final, onde os dados monitorados podem ser visualizados. Aqui, o usuário pode consultar as áreas monitoradas e obter informações sobre o estado atual das árvores.
+- Backend: O backend é responsável por gerenciar as solicitações feitas pela interface frontend, buscando os dados no banco de dados e enviando-os de volta para a visualização.
+- Banco de Dados: Onde todas as informações processadas e monitoradas são armazenadas.
+- ETL (Extract, Transform, Load): Esta camada é responsável pela ingestão de dados processados, transformando-os em informações úteis que podem ser armazenadas e visualizadas.
+- Edge Layer: Camada de processamento que opera nas bordas da rede, responsável por processar os dados dos drones e garantir sua integridade antes do envio ao backend.
 
 [^1]: [As Leis da Gestalt Aplicadas ao Design de Interfaces](https://brasil.uxdesign.cc/as-leis-da-gestalt-aplicadas-ao-design-de-interfaces-efc480dc06ec)
