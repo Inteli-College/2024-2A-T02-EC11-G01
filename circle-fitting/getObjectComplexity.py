@@ -1,7 +1,10 @@
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from numba import jit
 from scipy.ndimage import distance_transform_edt as bwdist
+from scipy.sparse.csgraph import shortest_path
 from skimage.measure import find_contours, label, regionprops
 from skimage.morphology import binary_closing, disk, remove_small_objects, skeletonize
 
@@ -103,20 +106,41 @@ def getObjectComplexity(A):
     return max(n2, 1)
 
 
-def getShannonComplexity(Points, LM, W0, Degree):
-    n_points = len(Points)
-    A = np.zeros((n_points, n_points))
-    BIGDIST = 10 * n_points + 10
-
+@jit
+def populate_A(A, n_points, Points):
     for i in range(n_points):
         for j in range(i + 1, n_points):
             d = (Points[i, 0] - Points[j, 0]) * 2 + (Points[i, 1] - Points[j, 1]) * 2
             if d <= 2:
                 A[i, j] = A[j, i] = 0.75 * d * (d - 1) + 1
 
-    from scipy.sparse.csgraph import shortest_path
 
-    dist_matrix = shortest_path(A, directed=False)
+@jit(nopython=True)
+def calculate_dist_matrix(A):
+    return shortest_path(A, directed=False)
+
+
+def getShannonComplexity(Points, LM, W0, Degree):
+    n_points = len(Points)
+    A = np.zeros((n_points, n_points))
+    BIGDIST = 10 * n_points + 10
+
+    populate_A(A, n_points, Points)
+
+    # for i in range(n_points):
+    #     for j in range(i + 1, n_points):
+    #         d = (Points[i, 0] - Points[j, 0]) * 2 + (Points[i, 1] - Points[j, 1]) * 2
+    #         if d <= 2:
+    #             A[i, j] = A[j, i] = 0.75 * d * (d - 1) + 1
+
+    # from scipy.sparse.csgraph import shortest_path
+
+    print("Starting shortest_path")
+    # dist_matrix = shortest_path(A, directed=False)
+
+    dist_matrix = calculate_dist_matrix(A)
+
+    breakpoint()
 
     Label = np.zeros((n_points, 2), dtype=int)
     if len(LM) > 2:
@@ -175,4 +199,3 @@ def getShannonComplexity(Points, LM, W0, Degree):
 
     print("Finish getObjectComplexity")
     return np.sum(n2) + np.log2(len(Points) + 0.0000001)
-
