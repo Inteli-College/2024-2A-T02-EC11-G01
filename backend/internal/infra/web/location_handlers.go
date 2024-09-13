@@ -30,11 +30,11 @@ func NewLocationHandler(locationRepo *repository.LocationRepository) *LocationHa
 }
 
 func (h *LocationHandler) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/locations", h.CreateLocation)
-	router.GET("/locations", h.FindAllLocations)
-	router.GET("/locations/:id", h.FindLocationById)
-	router.PUT("/locations/:id", h.UpdateLocation)
-	router.DELETE("/locations/:id", h.DeleteLocation)
+	router.POST("", h.CreateLocation)
+	router.GET("", h.FindAllLocations)
+	router.GET("/:id", h.FindLocationById)
+	router.PUT("/:id", h.UpdateLocation)
+	router.DELETE("/:id", h.DeleteLocation)
 }
 
 // CreateLocation godoc
@@ -45,7 +45,7 @@ func (h *LocationHandler) RegisterRoutes(router *gin.RouterGroup) {
 // @Produce json
 // @Param location body dto.CreateLocationInputDTO true "Create Location Input"
 // @Success 201 {object} dto.LocationOutputDTO
-// @Failure 400 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /locations [post]
 func (h *LocationHandler) CreateLocation(c *gin.Context) {
 	var input dto.CreateLocationInputDTO
@@ -71,6 +71,7 @@ func (h *LocationHandler) CreateLocation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} dto.LocationOutputDTO
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /locations [get]
 func (h *LocationHandler) FindAllLocations(c *gin.Context) {
 	ctx := context.Background()
@@ -91,7 +92,7 @@ func (h *LocationHandler) FindAllLocations(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Location ID"
 // @Success 200 {object} dto.LocationOutputDTO
-// @Failure 404 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /locations/{id} [get]
 func (h *LocationHandler) FindLocationById(c *gin.Context) {
 	id := c.Param("id")
@@ -115,7 +116,7 @@ func (h *LocationHandler) FindLocationById(c *gin.Context) {
 // @Param id path string true "Location ID"
 // @Param location body dto.CreateLocationInputDTO true "Update Location Input"
 // @Success 200 {object} dto.LocationOutputDTO
-// @Failure 400 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /locations/{id} [put]
 func (h *LocationHandler) UpdateLocation(c *gin.Context) {
 	id := c.Param("id")
@@ -142,8 +143,8 @@ func (h *LocationHandler) UpdateLocation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Location ID"
-// @Success 204 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Success 204 {object} map[string]string "Success"
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /locations/{id} [delete]
 func (h *LocationHandler) DeleteLocation(c *gin.Context) {
 	id := c.Param("id")

@@ -44,7 +44,7 @@ func (h *PredictionHandler) RegisterRoutes(router *gin.RouterGroup) {
 // @Produce json
 // @Param prediction body dto.CreatePredictionInputDTO true "Create Prediction Input"
 // @Success 201 {object} dto.PredictionDTO
-// @Failure 400 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /predictions [post]
 func (h *PredictionHandler) CreatePrediction(c *gin.Context) {
 	var input dto.CreatePredictionInputDTO
@@ -72,7 +72,8 @@ func (h *PredictionHandler) CreatePrediction(c *gin.Context) {
 // @Param limit query int false "Limit the number of results"
 // @Param offset query int false "Offset for pagination"
 // @Success 200 {array} dto.PredictionDTO
-// @Router /locations [get]
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /predictions [get]
 func (h *PredictionHandler) FindAllLocations(c *gin.Context) {
 	ctx := context.Background()
 
@@ -119,7 +120,7 @@ func (h *PredictionHandler) FindAllLocations(c *gin.Context) {
 // @Param limit query int false "Limit the number of results"
 // @Param offset query int false "Offset for pagination"
 // @Success 200 {array} dto.PredictionDTO
-// @Failure 404 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /predictions/location/{location_id} [get]
 func (h *PredictionHandler) FindAllPredictionsByLocationId(c *gin.Context) {
 	locationId := c.Param("location_id")
@@ -166,7 +167,7 @@ func (h *PredictionHandler) FindAllPredictionsByLocationId(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Prediction ID"
 // @Success 200 {object} dto.PredictionDTO
-// @Failure 400 {object} gin.H
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /predictions/{id} [get]
 func (h *PredictionHandler) FindPredictionByPredictionId(c *gin.Context) {
 	ctx := context.Background()

@@ -16,7 +16,7 @@ type PredictionRepository struct {
 }
 
 func NewPredictionRepository(db *gorm.DB) *PredictionRepository {
-	log.Printf("Prediction DB address: %v\n", db)
+	log.Printf("Prediction DB address: %p\n", db)
 	return &PredictionRepository{
 		db: db,
 	}

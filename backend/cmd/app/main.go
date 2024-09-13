@@ -2,11 +2,15 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/web"
+	ourSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/swagger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 //	@title			Manager API
@@ -47,6 +51,14 @@ func main() {
 
 	api := router.Group("/api/v1")
 
+	///////////////////// Swagger //////////////////////
+
+	if swaggerHost, ok := os.LookupEnv("SWAGGER_HOST"); ok {
+
+		ourSwagDocs.SwaggerInfo.Host = swaggerHost
+	}
+	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	/////////////////////// Handlers /////////////////////////
 
 	var locationsHandler *web.LocationHandler
@@ -78,6 +90,11 @@ func main() {
 			log.Fatal("Failing to load locationsHandler: nil pointer")
 		}
 		predictionsHandler.RegisterRoutes(predictionsGroup)
+	}
+
+	err := router.Run(":8080")
+	if err != nil {
+		log.Fatal("Error running server:", err)
 	}
 }
 

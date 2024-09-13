@@ -16,7 +16,7 @@ type LocationRepository struct {
 }
 
 func NewLocationRepository(db *gorm.DB) *LocationRepository {
-	log.Printf("Location DB address: %v\n", db)
+	log.Printf("Location DB address: %p\n", db)
 	return &LocationRepository{db: db}
 }
 
