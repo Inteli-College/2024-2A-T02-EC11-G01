@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
@@ -15,6 +16,7 @@ type PredictionRepository struct {
 }
 
 func NewPredictionRepository(db *gorm.DB) *PredictionRepository {
+	log.Printf("Prediction DB address: %v\n", db)
 	return &PredictionRepository{
 		db: db,
 	}

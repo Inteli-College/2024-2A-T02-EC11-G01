@@ -8,10 +8,10 @@ import (
 )
 
 type CreateLocationUseCase struct {
-	LocationRepository repository.LocationRepository
+	LocationRepository *repository.LocationRepository
 }
 
-func NewCreateLocationUseCase(locationRepository repository.LocationRepository) *CreateLocationUseCase {
+func NewCreateLocationUseCase(locationRepository *repository.LocationRepository) *CreateLocationUseCase {
 	return &CreateLocationUseCase{LocationRepository: locationRepository}
 }
 

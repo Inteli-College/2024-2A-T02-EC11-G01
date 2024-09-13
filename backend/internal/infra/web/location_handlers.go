@@ -18,7 +18,7 @@ type LocationHandler struct {
 	findAllLocationsUseCase *usecase.FindAllLocationsUseCase
 }
 
-func NewLocationHandler(router *gin.RouterGroup, locationRepo repository.LocationRepository) {
+func NewLocationHandler(locationRepo *repository.LocationRepository) *LocationHandler {
 	handler := &LocationHandler{
 		createLocationUseCase:   usecase.NewCreateLocationUseCase(locationRepo),
 		findLocationByIdUseCase: usecase.NewFindLocationByIdUseCase(locationRepo),
@@ -26,12 +26,7 @@ func NewLocationHandler(router *gin.RouterGroup, locationRepo repository.Locatio
 		deleteLocationUseCase:   usecase.NewDeleteLocationUseCase(locationRepo),
 		findAllLocationsUseCase: usecase.NewFindAllLocationsUseCase(locationRepo),
 	}
-
-	router.POST("/locations", handler.CreateLocation)
-	router.GET("/locations", handler.FindAllLocations)
-	router.GET("/locations/:id", handler.FindLocationById)
-	router.PUT("/locations/:id", handler.UpdateLocation)
-	router.DELETE("/locations/:id", handler.DeleteLocation)
+	return handler
 }
 
 func (h *LocationHandler) RegisterRoutes(router *gin.RouterGroup) {

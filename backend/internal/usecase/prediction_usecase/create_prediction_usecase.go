@@ -8,10 +8,10 @@ import (
 )
 
 type CreatePredictionUseCase struct {
-	PredictionRepository repository.PredictionRepository
+	PredictionRepository *repository.PredictionRepository
 }
 
-func NewCreatePredictionUsecase(predictionRepository repository.PredictionRepository) *CreatePredictionUseCase {
+func NewCreatePredictionUsecase(predictionRepository *repository.PredictionRepository) *CreatePredictionUseCase {
 	return &CreatePredictionUseCase{PredictionRepository: predictionRepository}
 }
 

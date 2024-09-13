@@ -8,10 +8,10 @@ import (
 )
 
 type FindAllPredictionsUsecase struct {
-	PredictionRepository repository.PredictionRepository
+	PredictionRepository *repository.PredictionRepository
 }
 
-func NewFindAllPredictionsUsecase(predictionRepository repository.PredictionRepository) *FindAllPredictionsUsecase {
+func NewFindAllPredictionsUsecase(predictionRepository *repository.PredictionRepository) *FindAllPredictionsUsecase {
 	return &FindAllPredictionsUsecase{PredictionRepository: predictionRepository}
 }
 

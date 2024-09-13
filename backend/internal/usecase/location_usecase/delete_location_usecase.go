@@ -7,10 +7,10 @@ import (
 )
 
 type DeleteLocationUseCase struct {
-	LocationRepository repository.LocationRepository
+	LocationRepository *repository.LocationRepository
 }
 
-func NewDeleteLocationUseCase(locationRepository repository.LocationRepository) *DeleteLocationUseCase {
+func NewDeleteLocationUseCase(locationRepository *repository.LocationRepository) *DeleteLocationUseCase {
 	return &DeleteLocationUseCase{LocationRepository: locationRepository}
 }
 

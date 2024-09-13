@@ -18,7 +18,7 @@ type PredictionHandler struct {
 	findAllPredictionsByLocationIdUsecase *prediction_usecase.FindAllPredictionsByLocationIdUsecase
 }
 
-func NewPredictionHandler(router *gin.RouterGroup, locationRepo repository.PredictionRepository) *PredictionHandler {
+func NewPredictionHandler(locationRepo *repository.PredictionRepository) *PredictionHandler {
 	handler := &PredictionHandler{
 		createPredictionUsecase:               prediction_usecase.NewCreatePredictionUsecase(locationRepo),
 		findPredictionByIdUsecase:             prediction_usecase.NewFindPredictionByIdUsecase(locationRepo),

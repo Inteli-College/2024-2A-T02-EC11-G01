@@ -2,6 +2,7 @@ package configs
 
 import (
 	"os"
+	"sync"
 
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupPostgres() (*gorm.DB, error) {
+func setupPostgres() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
 		os.Getenv("DATABASE_HOST"),
 		os.Getenv("DATABASE_USER"),
@@ -21,4 +22,10 @@ func SetupPostgres() (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	return db, err
+}
+
+var setupPostgresOnce = sync.OnceValues(setupPostgres)
+
+func SetupPostgres() (*gorm.DB, error) {
+	return setupPostgresOnce()
 }

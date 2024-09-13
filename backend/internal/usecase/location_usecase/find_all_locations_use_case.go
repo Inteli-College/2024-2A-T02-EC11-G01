@@ -8,10 +8,10 @@ import (
 )
 
 type FindAllLocationsUseCase struct {
-	LocationRepository repository.LocationRepository
+	LocationRepository *repository.LocationRepository
 }
 
-func NewFindAllLocationsUseCase(locationRepository repository.LocationRepository) *FindAllLocationsUseCase {
+func NewFindAllLocationsUseCase(locationRepository *repository.LocationRepository) *FindAllLocationsUseCase {
 	return &FindAllLocationsUseCase{LocationRepository: locationRepository}
 }
 

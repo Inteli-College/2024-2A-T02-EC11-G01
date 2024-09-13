@@ -3,24 +3,25 @@
 
 package main
 
-//
-// import (
-// 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
-// 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/interfaces/http"
-// 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase"
-// 	"github.com/google/wire"
-// 	"gorm.io/gorm"
-// )
-//
-// func InitializeLocationHandler(db *gorm.DB) *http.LocationHandler {
-// 	wire.Build(
-// 		repository.NewLocationRepository,
-// 		usecase.NewCreateLocationUseCase,
-// 		usecase.NewFindLocationByIdUseCase,
-// 		usecase.NewUpdateLocationUseCase,
-// 		usecase.NewDeleteLocationUseCase,
-// 		usecase.NewFindAllLocationsUseCase,
-// 		http.NewLocationHandler,
-// 	)
-// 	return &http.LocationHandler{}
-// }
+import (
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/web"
+	"github.com/google/wire"
+)
+
+var DBProviderSet = wire.NewSet(configs.SetupPostgres)
+var LocationRepositorySet = wire.NewSet(DBProviderSet, repository.NewLocationRepository)
+var PredictionRepositorySet = wire.NewSet(DBProviderSet, repository.NewPredictionRepository)
+
+func InitializeLocationsHandler() (*web.LocationHandler, error) {
+	wire.Build(LocationRepositorySet, web.NewLocationHandler)
+
+	return nil, nil
+}
+
+func InitializePredictionsHandler() (*web.PredictionHandler, error) {
+	wire.Build(PredictionRepositorySet, web.NewPredictionHandler)
+
+	return nil, nil
+}

@@ -8,10 +8,10 @@ import (
 )
 
 type FindPredictionByIdUseCase struct {
-	PredictionRepository repository.PredictionRepository
+	PredictionRepository *repository.PredictionRepository
 }
 
-func NewFindPredictionByIdUsecase(predictionRepository repository.PredictionRepository) *FindPredictionByIdUseCase {
+func NewFindPredictionByIdUsecase(predictionRepository *repository.PredictionRepository) *FindPredictionByIdUseCase {
 	return &FindPredictionByIdUseCase{PredictionRepository: predictionRepository}
 }
 
