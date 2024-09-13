@@ -1,13 +1,19 @@
+mod features;
+
 use std::io::{self, Write};
 use std::process::Command;
 use chrono;
+use dotenv::dotenv;
 
 use v4l::buffer::Type;
 use v4l::io::traits::CaptureStream;
 use v4l::prelude::*;
 use v4l::video::Capture;
 
-fn main() -> io::Result<()> {
+#[tokio::main]
+async fn main() -> io::Result<()> {
+    dotenv().ok();
+    
     let path = "/dev/video0";
     println!("Using device: {}\n", path);
 
@@ -27,7 +33,8 @@ fn main() -> io::Result<()> {
 
     // Prepare the output path in the home directory
     let current_dir = std::env::current_dir().unwrap();
-    let output_path = format!("{}/images/{}.mp4", current_dir.display(), chrono::prelude::Utc::now());
+    let timestamp = chrono::prelude::Utc::now().format("%Y%m%d_%H%M%S").to_string();
+    let output_path = format!("{}/images/{}.mp4", current_dir.display(), timestamp);
 
     // Start an ffmpeg process to encode the video stream to MP4
     let mut ffmpeg = Command::new("ffmpeg")
@@ -81,6 +88,10 @@ fn main() -> io::Result<()> {
     ffmpeg.wait().expect("ffmpeg process failed");
 
     println!("Video saved to {}", output_path);
+
+    if let Err(e) = features::aws::s3_upload::file_to_upload(&output_path).await {
+        eprintln!("Error uploading file: {:?}", e);
+    }
 
     Ok(())
 }
