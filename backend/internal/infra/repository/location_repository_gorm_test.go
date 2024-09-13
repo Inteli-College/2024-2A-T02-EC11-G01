@@ -1,43 +1,11 @@
-package repository_test
+package repository
 
 import (
 	"context"
-	"log"
-	"os"
 	"testing"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
-	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
-
-var db *gorm.DB
-var locationRepo *repository.LocationRepository
-
-func TestMain(m *testing.M) {
-	err := godotenv.Load("../../../.env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	if err != nil {
-		log.Fatalf("Error loading environment variables: %v", err)
-	}
-
-	db, err = configs.SetupPostgres()
-	if err != nil {
-		log.Fatalf("Error setting up database connection: %v", err)
-	}
-
-	locationRepo = repository.NewLocationRepository(db)
-
-	code := m.Run()
-
-	os.Exit(code)
-}
 
 func TestCreateLocation(t *testing.T) {
 	input := &dto.CreateLocationInputDTO{
@@ -128,4 +96,13 @@ func TestDeleteLocation(t *testing.T) {
 
 func strPtr(s string) *string {
 	return &s
+}
+
+func createLocation(ctx context.Context) (*dto.LocationOutputDTO, error) {
+	createLocationInput := &dto.CreateLocationInputDTO{
+		Name:        strPtr("Test Location for predictions tests"),
+		CoordinateX: strPtr("123.456"),
+		CoordinateY: strPtr("456.789"),
+	}
+	return locationRepo.CreateLocation(ctx, createLocationInput)
 }

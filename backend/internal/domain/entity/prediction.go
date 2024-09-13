@@ -1,20 +1,22 @@
 package entity
 
+import "time"
+
 type Prediction struct {
-	PredictionId    *string "json:\"prediction_id\""
-	RawImagePath    *string "json:\"raw_image_path\""
-	OutputImagePath *string "json:\"output_image_path\""
-	Output          *string "json:\"output\""
-	LocationId      *string "json:\"location_id\""
+	PredictionId    string `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	RawImagePath    string `gorm:"column:raw_image_path"`
+	OutputImagePath string
+	Output          []byte `gorm:"type:json"`
+	LocationId      string
+	CreatedAt       time.Time `gorm:"type:timestamp"`
 }
 
-func NewPrediction(predictionId string, rawImagePath string, outputImagePath string, output string, locationId string) *Prediction {
+func NewPrediction(rawImagePath *string, outputImagePath *string, output []byte, locationId *string) *Prediction {
 	return &Prediction{
-		PredictionId:    &predictionId,
-		RawImagePath:    &rawImagePath,
-		OutputImagePath: &outputImagePath,
-		Output:          &output,
-		LocationId:      &locationId,
+		RawImagePath:    *rawImagePath,
+		OutputImagePath: *outputImagePath,
+		Output:          output,
+		LocationId:      *locationId,
 	}
 }
 

@@ -1,6 +1,6 @@
 [private]
 default:
-  @just --choose
+  @just --list
 
 infra option='':
   @just --justfile ../Justfile infra "{{option}}"
@@ -8,3 +8,19 @@ infra option='':
 app:
   @go mod tidy
   @go run ./cmd/app/main.go
+
+[group("tests")]
+test package='' load-repo='' test-name='':
+  #!/bin/bash
+  if [ "{{package}}" == "repository" ]; then
+    just test-repository {{load-repo}} {{test-name}}
+  elif [ "{{package}}" == "none" ]; then
+    just
+  else
+    echo "None"
+  fi
+
+[no-cd]
+[group("tests")]
+test-repository load-repo='' test-name='':
+  go test -v ./internal/infra/repository {{ if test-name != '' { "-run" } else { "" } }} {{test-name}} -loadrepo={{load-repo}}

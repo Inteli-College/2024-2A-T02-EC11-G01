@@ -15,6 +15,7 @@ CREATE TABLE "predictions" (
     "output_image_path" TEXT,
     "output" JSONB,
     "location_id" UUID NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "predictions_pkey" PRIMARY KEY ("prediction_id")
 );
