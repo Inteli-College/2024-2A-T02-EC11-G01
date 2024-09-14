@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
@@ -150,13 +149,11 @@ func createPrediction(ctx context.Context) (*dto.PredictionDTO, error) {
 		"trees": "10",
 	}
 
-	outputJSON, _ := json.Marshal(output)
-
 	input := dto.CreatePredictionInputDTO{
 		RawImagePath:    &rawImagePath,
 		OutputImagePath: &outputImagePath,
 		LocationId:      mockLocationID,
-		Output:          outputJSON,
+		Output:          output,
 	}
 
 	return predictionRepo.Create(ctx, &input)

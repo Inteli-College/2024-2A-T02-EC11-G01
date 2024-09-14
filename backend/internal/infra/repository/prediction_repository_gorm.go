@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 
@@ -23,7 +24,13 @@ func NewPredictionRepository(db *gorm.DB) *PredictionRepository {
 }
 
 func (r *PredictionRepository) Create(ctx context.Context, predictionDTO *dto.CreatePredictionInputDTO) (*dto.PredictionDTO, error) {
-	prediction := entity.NewPrediction(predictionDTO.RawImagePath, predictionDTO.OutputImagePath, predictionDTO.Output, predictionDTO.LocationId)
+	outputJson, json_err := json.Marshal(predictionDTO.Output)
+
+	if json_err != nil {
+		return nil, json_err
+	}
+
+	prediction := entity.NewPrediction(predictionDTO.RawImagePath, predictionDTO.OutputImagePath, outputJson, predictionDTO.LocationId)
 
 	if err := r.db.WithContext(ctx).Create(prediction).Error; err != nil {
 		return nil, err
