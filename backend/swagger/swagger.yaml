@@ -39,9 +39,8 @@ definitions:
       location_id:
         type: string
       output:
-        items:
-          type: integer
-        type: array
+        additionalProperties: true
+        type: object
       output_image_path:
         type: string
       prediction_id:

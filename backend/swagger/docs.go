@@ -479,10 +479,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "output": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "output_image_path": {
                     "type": "string"
