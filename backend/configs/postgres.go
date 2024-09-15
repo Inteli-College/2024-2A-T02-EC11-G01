@@ -34,6 +34,7 @@ func SetupPostgres(postgresUrl string) (*gorm.DB, error) {
 	}
 
 	err = db.AutoMigrate(
+		&entity.Location{},
 		&entity.Prediction{},
 	)
 	if err != nil {
