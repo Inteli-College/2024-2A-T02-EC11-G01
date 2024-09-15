@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:13
@@ -17,7 +15,7 @@ services:
 
   migrations:
     build:
-      context: ./database
+      context: ./infra/database
       dockerfile: Dockerfile
     container_name: migrations
     environment:
@@ -28,14 +26,17 @@ services:
       - app-network
 
   rabbitmq:
-    image: rabbitmq:3-management
     container_name: rabbitmq
+    build: ./infra/rabbitMQ
     ports:
-      - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+    command: ["rabbitmq-server"]
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    restart: always
     networks:
       - app-network
 
