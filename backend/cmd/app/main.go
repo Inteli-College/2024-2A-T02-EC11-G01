@@ -14,10 +14,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/penglongli/gin-metrics/ginmetrics"
 	"github.com/streadway/amqp"
-	// swaggerFiles "github.com/swaggo/files"
-	// ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+//	@title			App API
+//	@version		1.0
+//	@description	This is a.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	App API Support
+//	@contact.url	https://github.com/Inteli-College/2024-2A-T02-EC11-G01
+//	@contact.email	gomedicine@inteli.edu.br
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host	localhost:8080
+//	@BasePath	/api/v1
 func main() {
 	/////////////////////// Configs /////////////////////////
 	conn, isSet := os.LookupEnv("POSTGRES_URL")
@@ -87,7 +101,7 @@ func main() {
 
 	api := router.Group("/api/v1")
 
-	// api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	{
 		predictionsGroup := api.Group("/predictions")
