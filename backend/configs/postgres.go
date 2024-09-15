@@ -28,11 +28,6 @@ func SetupPostgres(postgresUrl string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
 
-	err = db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error
-	if err != nil {
-		log.Fatalln("failed to create uuid-ossp extension:", err)
-	}
-
 	err = db.AutoMigrate(
 		&entity.Location{},
 		&entity.Prediction{},
