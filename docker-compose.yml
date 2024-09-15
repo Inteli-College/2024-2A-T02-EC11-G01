@@ -2,6 +2,8 @@ services:
   app:
     hostname: app
     restart: always
+    ports:
+      - "8080:8080"
     env_file:
       - ./backend/.env
     build:
@@ -10,8 +12,6 @@ services:
     depends_on:
       - postgres
       - rabbitmq
-    networks:
-      - app-network
 
   postgres:
     image: postgres:13
@@ -24,38 +24,31 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
 
-  migrations:
-    build:
-      context: ./infra/database
-      dockerfile: Dockerfile
-    container_name: migrations
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/db
-    depends_on:
-      - postgres
-    networks:
-      - app-network
+  # migrations:
+  #   build:
+  #     context: ./infra/database
+  #     dockerfile: Dockerfile
+  #   container_name: migrations
+  #   environment:
+  #     - DATABASE_URL=postgresql://user:password@postgres:5432/db
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
 
   rabbitmq:
     container_name: rabbitmq
     build: ./infra/rabbitMQ
     ports:
       - "15672:15672"
+      - "5672:5672"
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 2s
       timeout: 2s
       retries: 20
     restart: always
-    networks:
-      - app-network
 
 volumes:
   postgres_data:
-
-networks:
-  app-network:
-    driver: bridge
