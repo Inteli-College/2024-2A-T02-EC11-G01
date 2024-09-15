@@ -44,7 +44,6 @@ services:
     build: ./infra/rabbitMQ
     ports:
       - "15672:15672"
-    command: ["rabbitmq-server"]
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 2s
@@ -53,7 +52,6 @@ services:
     restart: always
     networks:
       - app-network
-    entrypoint: /docker-entrypoint-initdb.d/init.sh
 
 volumes:
   postgres_data:
