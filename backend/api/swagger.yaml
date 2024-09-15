@@ -2,18 +2,18 @@ basePath: /api/v1
 definitions:
   location_usecase.CreateLocationInputDTO:
     properties:
-      coordinate_x:
+      latitude:
         type: string
-      coordinate_y:
+      longitude:
         type: string
       name:
         type: string
     type: object
   location_usecase.CreateLocationOutputDTO:
     properties:
-      coordinate_x:
+      latitude:
         type: string
-      coordinate_y:
+      longitude:
         type: string
       created_at:
         type: string
@@ -24,9 +24,9 @@ definitions:
     type: object
   location_usecase.FindLocationOutputDTO:
     properties:
-      coordinate_x:
+      latitude:
         type: string
-      coordinate_y:
+      longitude:
         type: string
       created_at:
         type: string
@@ -39,9 +39,9 @@ definitions:
     type: object
   location_usecase.UpdateLocationInputDTO:
     properties:
-      coordinate_x:
+      latitude:
         type: string
-      coordinate_y:
+      longitude:
         type: string
       id:
         type: string
@@ -50,9 +50,9 @@ definitions:
     type: object
   location_usecase.UpdateLocationOutputDTO:
     properties:
-      coordinate_x:
+      latitude:
         type: string
-      coordinate_y:
+      longitude:
         type: string
       created_at:
         type: string

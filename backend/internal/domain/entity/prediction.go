@@ -32,6 +32,7 @@ type Prediction struct {
 
 func NewPrediction(rawImage string, annotatedImage string, detections uint, locationId uuid.UUID) (*Prediction, error) {
 	prediciton := &Prediction{
+		Id:             uuid.New(),
 		RawImage:       rawImage,
 		AnnotatedImage: annotatedImage,
 		Detections:     detections,
@@ -45,7 +46,7 @@ func NewPrediction(rawImage string, annotatedImage string, detections uint, loca
 }
 
 func (p *Prediction) Validate() error {
-	if p.RawImage == "" || p.AnnotatedImage == "" || p.LocationId == uuid.Nil || p.CreatedAt.IsZero() {
+	if p.Id == uuid.Nil || p.RawImage == "" || p.AnnotatedImage == "" || p.LocationId == uuid.Nil || p.CreatedAt.IsZero() {
 		return ErrInvalidPrediction
 	}
 	return nil

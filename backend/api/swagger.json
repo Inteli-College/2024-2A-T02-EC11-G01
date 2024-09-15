@@ -347,10 +347,10 @@
         "location_usecase.CreateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "name": {
@@ -361,10 +361,10 @@
         "location_usecase.CreateLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {
@@ -381,10 +381,10 @@
         "location_usecase.FindLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {
@@ -404,10 +404,10 @@
         "location_usecase.UpdateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "id": {
@@ -421,10 +421,10 @@
         "location_usecase.UpdateLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {

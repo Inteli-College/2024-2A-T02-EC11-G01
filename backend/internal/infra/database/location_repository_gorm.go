@@ -53,8 +53,8 @@ func (r *LocationRepositoryGorm) UpdateLocation(input *entity.Location) (*entity
 	}
 
 	location.Name = input.Name
-	location.CoordinateX = input.CoordinateX
-	location.CoordinateY = input.CoordinateY
+	location.Latitude = input.Latitude
+	location.Longitude = input.Longitude
 	location.UpdatedAt = input.UpdatedAt
 
 	res := r.Db.Save(location)

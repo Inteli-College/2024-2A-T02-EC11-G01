@@ -25,11 +25,11 @@ func (u *FindLocationByIdUsecase) Execute(input FindLocationByIdInputDTO) (*Find
 		return nil, err
 	}
 	return &FindLocationOutputDTO{
-		Id:          location.Id,
-		Name:        location.Name,
-		CoordinateX: location.CoordinateX,
-		CoordinateY: location.CoordinateY,
-		CreatedAt:   location.CreatedAt,
-		UpdatedAt:   location.UpdatedAt,
+		Id:        location.Id,
+		Name:      location.Name,
+		Latitude:  location.Latitude,
+		Longitude: location.Longitude,
+		CreatedAt: location.CreatedAt,
+		UpdatedAt: location.UpdatedAt,
 	}, nil
 }

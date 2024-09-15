@@ -22,12 +22,12 @@ func (u *FindAllLocationsUseCase) Execute() (*FindAllLocationsOutputDTO, error) 
 	output := make(FindAllLocationsOutputDTO, len(res))
 	for i, location := range res {
 		output[i] = &FindLocationOutputDTO{
-			Id:          location.Id,
-			Name:        location.Name,
-			CoordinateX: location.CoordinateX,
-			CoordinateY: location.CoordinateY,
-			CreatedAt:   location.CreatedAt,
-			UpdatedAt:   location.UpdatedAt,
+			Id:        location.Id,
+			Name:      location.Name,
+			Latitude:  location.Latitude,
+			Longitude: location.Longitude,
+			CreatedAt: location.CreatedAt,
+			UpdatedAt: location.UpdatedAt,
 		}
 	}
 	return &output, nil

@@ -9,17 +9,17 @@ import (
 )
 
 type CreateLocationInputDTO struct {
-	Name        string `json:"name"`
-	CoordinateX string `json:"coordinate_x"`
-	CoordinateY string `json:"coordinate_y"`
+	Name      string `json:"name"`
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
 type CreateLocationOutputDTO struct {
-	Id          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
-	CreatedAt   time.Time `json:"created_at"`
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Latitude  string    `json:"latitude"`
+	Longitude string    `json:"longitude"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type CreateLocationUseCase struct {
@@ -41,7 +41,7 @@ func NewCreateLocationUseCase(
 }
 
 func (u *CreateLocationUseCase) Execute(input CreateLocationInputDTO) (*CreateLocationOutputDTO, error) {
-	location, err := entity.NewLocation(input.Name, input.CoordinateX, input.CoordinateY)
+	location, err := entity.NewLocation(input.Name, input.Latitude, input.Longitude)
 	if err != nil {
 		return nil, err
 	}
@@ -51,11 +51,11 @@ func (u *CreateLocationUseCase) Execute(input CreateLocationInputDTO) (*CreateLo
 	}
 
 	dto := &CreateLocationOutputDTO{
-		Id:          res.Id,
-		Name:        res.Name,
-		CoordinateX: res.CoordinateX,
-		CoordinateY: res.CoordinateY,
-		CreatedAt:   res.CreatedAt,
+		Id:        res.Id,
+		Name:      res.Name,
+		Latitude:  res.Latitude,
+		Longitude: res.Longitude,
+		CreatedAt: res.CreatedAt,
 	}
 
 	u.LocationCreated.SetPayload(dto)
