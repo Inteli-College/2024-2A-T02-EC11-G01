@@ -21,7 +21,7 @@ type PredictionRepository interface {
 }
 
 type Prediction struct {
-	Id             uuid.UUID `json:"id" gorm:"primary_key;type:uuid;default:uuid_generate_v4()"`
+	Id             uuid.UUID `json:"id" gorm:"primary_key;type:uuid"`
 	RawImage       string    `json:"raw_image,omitempty" gorm:"type:text"`
 	AnnotatedImage string    `json:"annotated_image,omitempty" gorm:"type:text"`
 	Detections     uint      `json:"detections,omitempty" gorm:"type:integer"`

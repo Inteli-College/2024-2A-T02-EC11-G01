@@ -21,10 +21,10 @@ type LocationRepository interface {
 }
 
 type Location struct {
-	Id          uuid.UUID `json:"id,omitempty" gorm:"type:uuid;default:uuid_generate_v4()"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
+	Id          uuid.UUID `json:"id,omitempty" gorm:"primarykey;type:uuid"`
+	Name        string    `json:"name" gorm:"type:text"`
+	CoordinateX string    `json:"coordinate_x" gorm:"type:text"`
+	CoordinateY string    `json:"coordinate_y" gorm:"type:text"`
 	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"type:timestamp"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
