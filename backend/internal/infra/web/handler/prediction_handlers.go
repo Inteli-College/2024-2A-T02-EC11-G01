@@ -28,6 +28,15 @@ func NewPredictionHandlers(
 	}
 }
 
+// CreatePredictionHandler
+// @Summary Create a new Prediction
+// @Description Create a new Prediction in the system
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param input body prediction_usecase.CreatePredictionInputDTO true "Prediction entity to create"
+// @Success 200 {object} prediction_usecase.CreatePredictionOutputDTO
+// @Router /predictions [post]
 func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.CreatePredictionInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -46,6 +55,15 @@ func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// FindPredictionByIdHandler
+// @Summary Retrieve a Prediction by ID
+// @Description Get details of a specific Prediction by its ID
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param id path string true "Prediction ID"
+// @Success 200 {object} prediction_usecase.FindPredictionOutputDTO
+// @Router /predictions/{id} [get]
 func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
 	var input prediction_usecase.FindPredictionByIdInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -60,6 +78,14 @@ func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// FindAllPredictionsHandler
+// @Summary Retrieve all Predictions
+// @Description Get a list of all Predictions
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Success 200 {array} prediction_usecase.FindAllPredictionsOutputDTO
+// @Router /predictions [get]
 func (h *PredictionHandlers) FindAllPredictionsHandler(c *gin.Context) {
 	res, err := prediction_usecase.NewFindAllPredictionsUseCase(h.PredictionRepository).Execute()
 	if err != nil {
@@ -69,6 +95,16 @@ func (h *PredictionHandlers) FindAllPredictionsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// UpdatePredictionHandler
+// @Summary Update a Prediction
+// @Description Update a specific Prediction entity
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param id path string true "Prediction ID"
+// @Param input body prediction_usecase.UpdatePredictionInputDTO true "Prediction entity to update"
+// @Success 200 {object} prediction_usecase.UpdatePredictionOutputDTO
+// @Router /predictions/{id} [put]
 func (h *PredictionHandlers) UpdatePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.UpdatePredictionInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -88,6 +124,15 @@ func (h *PredictionHandlers) UpdatePredictionHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// DeletePredictionHandler
+// @Summary Delete a Prediction
+// @Description Remove a specific Prediction from the system
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param id path string true "Prediction ID"
+// @Success 200 {string} string "Prediction deleted successfully"
+// @Router /predictions/{id} [delete]
 func (h *PredictionHandlers) DeletePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.DeletePredictionInputDTO
 	id, err := uuid.Parse(c.Param("id"))

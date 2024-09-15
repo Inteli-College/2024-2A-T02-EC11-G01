@@ -28,6 +28,15 @@ func NewLocationHandlers(
 	}
 }
 
+// CreateLocationHandler
+// @Summary Create a new Location
+// @Description Create a new Location in the system
+// @Tags Locations
+// @Accept json
+// @Produce json
+// @Param input body location_usecase.CreateLocationInputDTO true "Location entity to create"
+// @Success 200 {object} location_usecase.CreateLocationOutputDTO
+// @Router /locations [post]
 func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 	var input location_usecase.CreateLocationInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -46,6 +55,15 @@ func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// FindLocationByIdHandler
+// @Summary Retrieve a Location by ID
+// @Description Get details of a specific Location by its ID
+// @Tags Locations
+// @Accept json
+// @Produce json
+// @Param id path string true "Location ID"
+// @Success 200 {object} location_usecase.FindLocationOutputDTO
+// @Router /locations/{id} [get]
 func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 	var input location_usecase.FindLocationByIdInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -60,6 +78,14 @@ func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// FindAllLocationsHandler
+// @Summary Retrieve all Locations
+// @Description Get a list of all Locations
+// @Tags Locations
+// @Accept json
+// @Produce json
+// @Success 200 {array} location_usecase.FindAllLocationsOutputDTO
+// @Router /locations [get]
 func (h *LocationHandlers) FindAllLocationsHandler(c *gin.Context) {
 	res, err := location_usecase.NewFindAllLocationsUseCase(h.LocationRepository).Execute()
 	if err != nil {
@@ -69,6 +95,16 @@ func (h *LocationHandlers) FindAllLocationsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// UpdateLocationHandler
+// @Summary Update a Location
+// @Description Update a specific Location entity
+// @Tags Locations
+// @Accept json
+// @Produce json
+// @Param id path string true "Location ID"
+// @Param input body location_usecase.UpdateLocationInputDTO true "Location entity to update"
+// @Success 200 {object} location_usecase.UpdateLocationOutputDTO
+// @Router /locations/{id} [put]
 func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 	var input location_usecase.UpdateLocationInputDTO
 	if err := c.BindJSON(&input); err != nil {
@@ -88,6 +124,15 @@ func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// DeleteLocationHandler
+// @Summary Delete a Location
+// @Description Remove a specific Location from the system
+// @Tags Locations
+// @Accept json
+// @Produce json
+// @Param id path string true "Location ID"
+// @Success 200 {string} string "Location deleted successfully"
+// @Router /locations/{id} [delete]
 func (h *LocationHandlers) DeleteLocationHandler(c *gin.Context) {
 	var input location_usecase.DeleteLocationInputDTO
 	id, err := uuid.Parse(c.Param("id"))
