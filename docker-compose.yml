@@ -10,8 +10,8 @@ services:
       context: ./backend
       dockerfile: build/Dockerfile.app
     depends_on:
-      - postgres
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   postgres:
     image: postgres:13
@@ -39,10 +39,11 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    build: ./infra/rabbitMQ
+    build: ./infraestructure/rabbitMQ
     ports:
       - "15672:15672"
-      - "5672:5672"
+    expose:
+      - "5672"
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 2s
