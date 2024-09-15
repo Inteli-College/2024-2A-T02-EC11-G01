@@ -353,10 +353,10 @@ const docTemplate = `{
         "location_usecase.CreateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "name": {
@@ -367,10 +367,10 @@ const docTemplate = `{
         "location_usecase.CreateLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {
@@ -387,10 +387,10 @@ const docTemplate = `{
         "location_usecase.FindLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {
@@ -410,10 +410,10 @@ const docTemplate = `{
         "location_usecase.UpdateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "id": {
@@ -427,10 +427,10 @@ const docTemplate = `{
         "location_usecase.UpdateLocationOutputDTO": {
             "type": "object",
             "properties": {
-                "coordinate_x": {
+                "latitude": {
                     "type": "string"
                 },
-                "coordinate_y": {
+                "longitude": {
                     "type": "string"
                 },
                 "created_at": {

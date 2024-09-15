@@ -29,12 +29,13 @@ type Location struct {
 	UpdatedAt   time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
 
-func NewLocation(name string, coordinateX string, coordinateY string) (*Location, error) {
+func NewLocation(name string, latitude string, longitude string) (*Location, error) {
 	location := &Location{
-		Name:        name,
-		CoordinateX: coordinateX,
-		CoordinateY: coordinateY,
-		CreatedAt:   time.Now(),
+		Id:        uuid.New(),
+		Name:      name,
+		Latitude:  latitude,
+		Longitude: longitude,
+		CreatedAt: time.Now(),
 	}
 	if err := location.Validate(); err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func NewLocation(name string, coordinateX string, coordinateY string) (*Location
 }
 
 func (l *Location) Validate() error {
-	if l.Name == "" || l.CoordinateX == "" || l.CoordinateY == "" || l.CreatedAt.IsZero() {
+	if l.Id == uuid.Nil || l.Name == "" || l.Latitude == "" || l.Longitude == "" || l.CreatedAt.IsZero() {
 		return ErrInvalidLocation
 	}
 	return nil

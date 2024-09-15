@@ -7,10 +7,10 @@ import (
 )
 
 type FindLocationOutputDTO struct {
-	Id          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Latitude  string    `json:"latitude"`
+	Longitude string    `json:"longitude"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

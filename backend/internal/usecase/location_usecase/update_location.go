@@ -8,19 +8,19 @@ import (
 )
 
 type UpdateLocationInputDTO struct {
-	Id          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Latitude  string    `json:"latitude"`
+	Longitude string    `json:"longitude"`
 }
 
 type UpdateLocationOutputDTO struct {
-	Id          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Latitude  string    `json:"latitude"`
+	Longitude string    `json:"longitude"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type UpdateLocationUseCase struct {
@@ -35,21 +35,21 @@ func NewUpdateLocationUseCase(locationRepository entity.LocationRepository) *Upd
 
 func (u *UpdateLocationUseCase) Execute(input UpdateLocationInputDTO) (*UpdateLocationOutputDTO, error) {
 	location, err := u.LocationRepository.UpdateLocation(&entity.Location{
-		Id:          input.Id,
-		Name:        input.Name,
-		CoordinateX: input.CoordinateX,
-		CoordinateY: input.CoordinateY,
-		UpdatedAt:   time.Now(),
+		Id:        input.Id,
+		Name:      input.Name,
+		Latitude:  input.Latitude,
+		Longitude: input.Longitude,
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &UpdateLocationOutputDTO{
-		Id:          location.Id,
-		Name:        location.Name,
-		CoordinateX: location.CoordinateX,
-		CoordinateY: location.CoordinateY,
-		CreatedAt:   location.CreatedAt,
-		UpdatedAt:   location.UpdatedAt,
+		Id:        location.Id,
+		Name:      location.Name,
+		Latitude:  location.Latitude,
+		Longitude: location.Longitude,
+		CreatedAt: location.CreatedAt,
+		UpdatedAt: location.UpdatedAt,
 	}, nil
 }
