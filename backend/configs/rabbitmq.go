@@ -1,20 +1,15 @@
 package configs
 
-import (
-	"log"
-	amqp "github.com/rabbitmq/amqp091-go"
-)
+import "github.com/streadway/amqp"
 
-func SetupRabbitMQ() *amqp.Channel {
-	conn, err := amqp.Dial("amqp://consumerUser:consumerPassword@rabbitmq:5672/")
+func SetupRabbitMQChannel(rabbitMQChannel string) (*amqp.Channel, error) {
+	conn, err := amqp.Dial(rabbitMQChannel)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-		defer conn.Close()
+		panic(err)
 	}
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
-		defer ch.Close()
+		panic(err)
 	}
-	return ch
+	return ch, nil
 }

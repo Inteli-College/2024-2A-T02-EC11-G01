@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  app:
+    hostname: app
+    restart: always
+    env_file:
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: build/Dockerfile.app
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - app-network
+
   postgres:
     image: postgres:13
     container_name: postgres
@@ -15,17 +29,17 @@ services:
     networks:
       - app-network
 
-  migrations:
-    build:
-      context: ./database
-      dockerfile: Dockerfile
-    container_name: migrations
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/db
-    depends_on:
-      - postgres
-    networks:
-      - app-network
+  # migrations:
+  #   build:
+  #     context: ./database
+  #     dockerfile: Dockerfile
+  #   container_name: migrations
+  #   environment:
+  #     - DATABASE_URL=postgresql://user:password@postgres:5432/db
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -36,8 +50,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - ./init.sh:/docker-entrypoint-initdb.d/init.sh
     networks:
       - app-network
+    entrypoint: /docker-entrypoint-initdb.d/init.sh
 
 volumes:
   postgres_data:
