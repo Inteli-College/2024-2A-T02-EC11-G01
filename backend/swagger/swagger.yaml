@@ -1,0 +1,331 @@
+basePath: /api/v1
+definitions:
+  dto.CreateLocationInputDTO:
+    properties:
+      coordinate_x:
+        type: string
+      coordinate_y:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.CreatePredictionInputDTO:
+    properties:
+      location_id:
+        type: string
+      output:
+        additionalProperties: true
+        type: object
+      output_image_path:
+        type: string
+      raw_image_path:
+        type: string
+    type: object
+  dto.LocationOutputDTO:
+    properties:
+      coordinate_x:
+        type: string
+      coordinate_y:
+        type: string
+      location_id:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.PredictionDTO:
+    properties:
+      created_at:
+        type: string
+      location_id:
+        type: string
+      output:
+        additionalProperties: true
+        type: object
+      output_image_path:
+        type: string
+      prediction_id:
+        type: string
+      raw_image_path:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: gomedicine@inteli.edu.br
+    name: Manager API Support
+    url: https://github.com/Inteli-College/2024-1B-T02-EC10-G04
+  description: This is a.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Manager API
+  version: "1.0"
+paths:
+  /locations:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.LocationOutputDTO'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all locations
+      tags:
+      - locations
+    post:
+      consumes:
+      - application/json
+      description: Create a new location
+      parameters:
+      - description: Create Location Input
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLocationInputDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.LocationOutputDTO'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new location
+      tags:
+      - locations
+  /locations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a location by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a location
+      tags:
+      - locations
+    get:
+      consumes:
+      - application/json
+      description: Get a location by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LocationOutputDTO'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a location by ID
+      tags:
+      - locations
+    put:
+      consumes:
+      - application/json
+      description: Update a location by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Location Input
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLocationInputDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LocationOutputDTO'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a location
+      tags:
+      - locations
+  /predictions:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all predictions
+      parameters:
+      - description: Limit the number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PredictionDTO'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all predictions
+      tags:
+      - Predictions
+    post:
+      consumes:
+      - application/json
+      description: Create a new prediction
+      parameters:
+      - description: Create Prediction Input
+        in: body
+        name: prediction
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePredictionInputDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PredictionDTO'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new prediction
+      tags:
+      - Predictions
+  /predictions/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find prediction by id
+      parameters:
+      - description: Prediction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PredictionDTO'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Find prediction by id
+      tags:
+      - Predictions
+  /predictions/location/{location_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get predictions by location Id
+      parameters:
+      - description: Location ID
+        in: path
+        name: location_id
+        required: true
+        type: string
+      - description: Limit the number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PredictionDTO'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get predictions by location Id
+      tags:
+      - Predictions
+securityDefinitions:
+  BearerAuth:
+    description: '"Type: Bearer token"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

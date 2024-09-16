@@ -1,0 +1,51 @@
+set dotenv-required := true
+
+[private]
+default:
+  @just --list
+
+# Database and queue containers up
+infra option='':
+  @just --justfile ../Justfile infra "{{option}}"
+
+[no-cd]
+[group("application")]
+app:
+  @go mod tidy
+  @just swag
+  @just wire
+  @go run ./cmd/app
+
+[group("application")]
+swag path='':
+  #!/bin/bash
+  if command -v swag >/dev/null 2>&1; then
+    swag init -g {{ if path != '' {path} else {"./cmd/app/main.go"} }} -o ./swagger > /dev/null 2>&1
+  else
+    docker run --rm -v $(pwd):/code ghcr.io/swaggo/swag:latest init -g ./cmd/server/main.go -o ./api 
+  fi
+
+[group("application")]
+wire path='':
+  #!/bin/bash
+  if command -v wire >/dev/null 2>&1; then
+    wire {{ if path != '' {path} else {"./cmd/app"} }} > /dev/null 2>&1
+  else
+    echo -e "You must install wire: please run:\n go install github.com/google/wire/cmd/wire@latest" 
+  fi
+
+[group("application tests")]
+test package='' load-repo='' test-name='':
+  #!/bin/bash
+  if [ "{{package}}" == "repository" ]; then
+    just test-repository {{load-repo}} {{test-name}}
+  elif [ "{{package}}" == "none" ]; then
+    just
+  else
+    echo "None"
+  fi
+
+[no-cd]
+[group("application tests")]
+test-repository load-repo='' test-name='':
+  go test -v ./internal/infra/repository {{ if test-name != '' { "-run" } else { "" } }} {{test-name}} -loadrepo={{load-repo}}
