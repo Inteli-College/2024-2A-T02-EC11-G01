@@ -27,6 +27,18 @@ services:
     networks:
       - app-network
 
+  serverless:
+    build: ./serverless
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./serverless/.env
+    volumes:
+      - s3bucket:/mnt/s3bucket
+    depends_on:
+      - rabbitmq
+      - filesystem
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -39,8 +51,17 @@ services:
     networks:
       - app-network
 
+  filesystem:
+    build: ./filesystem
+    volumes:
+      - s3bucket:/mnt/s3bucket
+    env_file:
+      - ./filesystem/.env
+    privileged: true
+
 volumes:
   postgres_data:
+  s3bucket:
 
 networks:
   app-network:

@@ -1,6 +1,6 @@
 import json
 from fastapi import Depends, FastAPI, File, UploadFile
-from deepforest import main
+from deepforest import main as deepforest_main
 import io
 import cv2
 from PIL import Image
@@ -23,7 +23,7 @@ if os.path.exists(model_file_path):
     with open(model_file_path, "rb") as f:
         model = pickle.load(f)
 else:
-    model = main.deepforest()
+    model = deepforest_main.deepforest()
     model.use_release()
     with open(model_file_path, "wb") as f:
         pickle.dump(model, f)
