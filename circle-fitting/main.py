@@ -2,10 +2,16 @@ import cv2
 
 from funTreeCountingGT import funTreeCountingGT
 
-image_name = "test-image"
-I = cv2.imread("/home/grupo1/google-drive-download-image" + image_name + ".jpeg")
+if __name__ == "__main__":
+    image_name = "test-image"
+    I = cv2.imread("/Users/henriquematias/Downloads/images/" + image_name + ".jpeg")
 
-res = funTreeCountingGT(I)
+    altura, largura = I.shape[:2]
 
-print(len(res[0]))
+    I_resized = cv2.resize(I, (largura // 2, altura // 2))
 
+    breakpoint()
+
+    res = funTreeCountingGT(I_resized)
+
+    print(len(res[0]))

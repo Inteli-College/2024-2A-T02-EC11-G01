@@ -1,10 +1,13 @@
+from datetime import datetime
+from multiprocessing import Pool
 
 import cv2
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 from numba import jit
 from scipy.ndimage import distance_transform_edt as bwdist
-from scipy.sparse.csgraph import shortest_path
+from scipy.sparse.csgraph import dijkstra, shortest_path
 from skimage.measure import find_contours, label, regionprops
 from skimage.morphology import binary_closing, disk, remove_small_objects, skeletonize
 
@@ -120,12 +123,53 @@ def calculate_dist_matrix(A):
     return shortest_path(A, directed=False)
 
 
+def populate_WO_and_Label(tempDeg, LM, SA, Ind, W0, Label, BIGDIST):
+    ite = Label.shape[0]
+    CLM = np.zeros((len(LM), len(LM)))
+    ok = 0
+
+    while np.sum(tempDeg) > 0:
+        print(np.sum(tempDeg))
+        ok = min(ok, 0)
+        for i in range(len(LM)):
+            if tempDeg[i] > 0:
+                grade = np.min(tempDeg[tempDeg > 0])
+                if tempDeg[i] == grade:
+                    # Recreate G from updated SA
+                    G = nx.from_numpy_array(SA, create_using=nx.Graph())
+                    # Compute shortest paths from node LM[i]
+                    lengths = nx.single_source_dijkstra_path_length(G, LM[i])
+                    # Get nodes sorted by distance
+                    sorted_nodes = sorted(lengths, key=lengths.get)
+                    for node in sorted_nodes:
+                        k = Ind.get(node, -1)
+                        if k >= 0 and tempDeg[k] > 0 and CLM[i, k] == 1 and i != k:
+                            ite += 1
+                            # Update SA to effectively remove the edge
+                            SA[LM[i], LM[k]] = BIGDIST
+                            SA[LM[k], LM[i]] = BIGDIST
+                            # Update Label and W0
+                            Label.append([min(LM[i], LM[k]), max(LM[i], LM[k])])
+                            W0[ite] = W0[LM[i]]
+                            ite += 1
+                            Label[ite, 1] = min(i, k)
+                            Label[ite, 2] = max(i, k)
+                            W0[ite] = W0[LM[k]]
+                            tempDeg[k] -= 1
+                            tempDeg[i] -= 1
+                            CLM[i, k] = 0
+                            CLM[k, i] = 0
+                            ok += 1
+                            break
+
+
 def getShannonComplexity(Points, LM, W0, Degree):
     n_points = len(Points)
     A = np.zeros((n_points, n_points))
     BIGDIST = 10 * n_points + 10
 
     populate_A(A, n_points, Points)
+    breakpoint()
 
     # for i in range(n_points):
     #     for j in range(i + 1, n_points):
@@ -133,12 +177,38 @@ def getShannonComplexity(Points, LM, W0, Degree):
     #         if d <= 2:
     #             A[i, j] = A[j, i] = 0.75 * d * (d - 1) + 1
 
-    # from scipy.sparse.csgraph import shortest_path
+    from scipy.sparse import csr_matrix
+    from scipy.sparse.csgraph import shortest_path
+
+    SA = csr_matrix(A)
 
     print("Starting shortest_path")
-    # dist_matrix = shortest_path(A, directed=False)
+    start_current_datetime = datetime.now()
+    print(f"Started at: {start_current_datetime}")
 
-    dist_matrix = calculate_dist_matrix(A)
+    dist_matrix = shortest_path(SA, method="D", directed=False)
+
+    finish_current_datetime = datetime.now()
+    print(f"Finished at: {finish_current_datetime}")
+
+    time_delta = finish_current_datetime - start_current_datetime
+
+    print(f"Shortest path took: {time_delta.total_seconds() / 60}")
+
+    # num_processes = 5  # Adjust based on your system
+    # nodes = np.arange(A_sparse.shape[0])
+    # chunks = np.array_split(nodes, num_processes)
+
+    # Prepare arguments for the worker processes
+    # args = [(A_sparse, chunk) for chunk in chunks]
+
+    # with Pool(processes=num_processes) as pool:
+    #     results = pool.map(compute_shortest_paths, args)
+
+    # Combine the results
+    # dist_matrix = np.vstack(results)
+
+    # dist_matrix = calculate_dist_matrix(A)
 
     breakpoint()
 
@@ -155,26 +225,36 @@ def getShannonComplexity(Points, LM, W0, Degree):
                 closest_two = np.argsort(dist_to_LM)[:2]
                 Label[i] = [min(closest_two), max(closest_two)]
 
+    breakpoint()
     tempDeg = np.array(Degree)
-    CLM = np.zeros((len(LM), len(LM)))
-    ok = 0
 
-    while np.sum(tempDeg) > 0:
-        for i, deg in enumerate(tempDeg):
-            if deg > 0:
-                dist_to_LM = dist_matrix[LM[i]]
-                sorted_indices = np.argsort(dist_to_LM)
-                for j in sorted_indices:
-                    k = Ind[j]
-                    if k > 0 and tempDeg[k] > 0 and CLM[i, k] == 0 and i != k:
-                        tempDeg[k] -= 1
-                        tempDeg[i] -= 1
-                        CLM[i, k] = 0
-                        ok += 1
-                        break
-        ok -= 1
-        if ok < -5:
-            break
+    breakpoint()
+
+    start_while_datetime = datetime.now()
+    print(f"While started at: {start_while_datetime}")
+    # while np.sum(tempDeg) > 0:
+    #     for i, deg in enumerate(tempDeg):
+    #         if deg > 0:
+    #             dist_to_LM = dist_matrix[LM[i]]
+    #             sorted_indices = np.argsort(dist_to_LM)
+    #             for j in sorted_indices:
+    #                 k = Ind[j] - 1
+    #                 if k > 0 and tempDeg[k] > 0 and CLM[i, k] == 0 and i != k:
+    #                     tempDeg[k] -= 1
+    #                     tempDeg[i] -= 1
+    #                     CLM[i, k] = 0
+    #                     ok += 1
+    #                     break
+    #     ok -= 1
+    #     if ok < -5:
+    #         break
+    populate_WO_and_Label(tempDeg, LM, SA, Ind, W0, Label, BIGDIST)
+    finish_while_datetime = datetime.now()
+
+    time_delta = finish_while_datetime - start_while_datetime
+    print(f"While took: {time_delta.total_seconds() / 60}")
+
+    breakpoint()
 
     unique_L1 = np.unique(Label[:, 0])
     unique_L2 = np.unique(Label[:, 1])
@@ -199,3 +279,4 @@ def getShannonComplexity(Points, LM, W0, Degree):
 
     print("Finish getObjectComplexity")
     return np.sum(n2) + np.log2(len(Points) + 0.0000001)
+
