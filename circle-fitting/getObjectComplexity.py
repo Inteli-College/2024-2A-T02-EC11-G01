@@ -3,10 +3,10 @@ from multiprocessing import Pool
 
 import cv2
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 from numba import jit
 from scipy.ndimage import distance_transform_edt as bwdist
+from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra, shortest_path
 from skimage.measure import find_contours, label, regionprops
 from skimage.morphology import binary_closing, disk, remove_small_objects, skeletonize
@@ -118,49 +118,78 @@ def populate_A(A, n_points, Points):
                 A[i, j] = A[j, i] = 0.75 * d * (d - 1) + 1
 
 
-@jit(nopython=True)
-def calculate_dist_matrix(A):
-    return shortest_path(A, directed=False)
+def update_SA_Lable_and_W0(
+    sorted_nodes, Ind, tempDeg, CLM, i, SA, LM, Label, W0, BIGDIST, ok, ite
+):
+    start_for = datetime.now()
+    print(f"Start for at {start_for}")
+    for j in range(len(sorted_nodes)):
+        k = Ind[sorted_nodes[j]] - 1
+        if k >= 0 and tempDeg[k] > 0 and CLM[i, k] == 0 and i != k:
+            ite += 1
+            # Update SA to effectively remove the edge
+            SA[LM[i], LM[k]] = BIGDIST
+            SA[LM[k], LM[i]] = BIGDIST
+
+            Label = np.append(Label, [min(i, k), max(i, k)])
+            # Update Label and W0
+            WO = np.append(W0, W0[LM[i]])
+            ite += 1
+            Label = np.append(Label, [min(i, k), max(i, k)])
+            # Label[ite, 0] = min(i, k)
+            # Label[ite, 1] = max(i, k)
+            WO = np.append(W0, W0[LM[k]])
+            # W0[ite] = W0[LM[k]]
+            tempDeg[k] -= 1
+            tempDeg[i] -= 1
+            CLM[i, k] = 0
+            CLM[k, i] = 0
+            ok += 1
+            break
+    end_for = datetime.now()
+    print(f"End for at {end_for}")
+    print(f"For took {(end_for - start_for).total_seconds() / 60}")
 
 
 def populate_WO_and_Label(tempDeg, LM, SA, Ind, W0, Label, BIGDIST):
-    ite = Label.shape[0]
+    # ite = 0
+    ite = Label.shape[0] - 1
     CLM = np.zeros((len(LM), len(LM)))
     ok = 0
 
     while np.sum(tempDeg) > 0:
-        print(np.sum(tempDeg))
+        print(f"{np.sum(tempDeg)} at {datetime.now()}")
         ok = min(ok, 0)
         for i in range(len(LM)):
             if tempDeg[i] > 0:
                 grade = np.min(tempDeg[tempDeg > 0])
                 if tempDeg[i] == grade:
-                    # Recreate G from updated SA
-                    G = nx.from_numpy_array(SA, create_using=nx.Graph())
-                    # Compute shortest paths from node LM[i]
-                    lengths = nx.single_source_dijkstra_path_length(G, LM[i])
-                    # Get nodes sorted by distance
-                    sorted_nodes = sorted(lengths, key=lengths.get)
-                    for node in sorted_nodes:
-                        k = Ind.get(node, -1)
-                        if k >= 0 and tempDeg[k] > 0 and CLM[i, k] == 1 and i != k:
-                            ite += 1
-                            # Update SA to effectively remove the edge
-                            SA[LM[i], LM[k]] = BIGDIST
-                            SA[LM[k], LM[i]] = BIGDIST
-                            # Update Label and W0
-                            Label.append([min(LM[i], LM[k]), max(LM[i], LM[k])])
-                            W0[ite] = W0[LM[i]]
-                            ite += 1
-                            Label[ite, 1] = min(i, k)
-                            Label[ite, 2] = max(i, k)
-                            W0[ite] = W0[LM[k]]
-                            tempDeg[k] -= 1
-                            tempDeg[i] -= 1
-                            CLM[i, k] = 0
-                            CLM[k, i] = 0
-                            ok += 1
-                            break
+                    d, _ = shortest_path(
+                        SA,
+                        method="D",
+                        directed=False,
+                        return_predecessors=True,
+                        indices=LM[i],
+                    )
+                    sorted_nodes = np.argsort(d)
+
+                    update_SA_Lable_and_W0(
+                        sorted_nodes,
+                        Ind,
+                        tempDeg,
+                        CLM,
+                        i,
+                        SA,
+                        LM,
+                        Label,
+                        W0,
+                        BIGDIST,
+                        ok,
+                        ite,
+                    )
+        ok -= 1
+        if ok < -5:
+            break
 
 
 def getShannonComplexity(Points, LM, W0, Degree):
@@ -177,16 +206,18 @@ def getShannonComplexity(Points, LM, W0, Degree):
     #         if d <= 2:
     #             A[i, j] = A[j, i] = 0.75 * d * (d - 1) + 1
 
-    from scipy.sparse import csr_matrix
-    from scipy.sparse.csgraph import shortest_path
-
-    SA = csr_matrix(A)
+    SA = csr_matrix(A, dtype=np.float32)
+    breakpoint()
 
     print("Starting shortest_path")
     start_current_datetime = datetime.now()
-    print(f"Started at: {start_current_datetime}")
 
-    dist_matrix = shortest_path(SA, method="D", directed=False)
+    try:
+        dist_matrix = np.load("./SA_dist_matrix_reshaped.npy")
+    except:
+        print(f"Could not load shortest path from file")
+        print(f"Started calculating at: {start_current_datetime}")
+        dist_matrix = shortest_path(SA, method="D", directed=False)
 
     finish_current_datetime = datetime.now()
     print(f"Finished at: {finish_current_datetime}")
