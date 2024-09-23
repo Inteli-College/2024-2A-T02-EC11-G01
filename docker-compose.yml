@@ -39,7 +39,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    build: ./infraestructure/rabbitMQ
+    build: ./infraestructure/rabbitmq
     ports:
       - "15672:15672"
     expose:

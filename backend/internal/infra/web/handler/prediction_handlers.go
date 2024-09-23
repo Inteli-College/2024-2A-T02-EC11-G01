@@ -66,10 +66,11 @@ func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
 // @Router /predictions/{id} [get]
 func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
 	var input prediction_usecase.FindPredictionByIdInputDTO
-	if err := c.BindJSON(&input); err != nil {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
 	}
+	input.Id = id
 	res, err := prediction_usecase.NewFindPredictionByIdUseCase(h.PredictionRepository).Execute(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
