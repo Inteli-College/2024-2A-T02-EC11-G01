@@ -3,9 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
-	"github.com/streadway/amqp"
 	"sync"
+
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type LocationCreatedHandler struct {
@@ -23,16 +24,16 @@ func (h *LocationCreatedHandler) Handle(event events.EventInterface, wg *sync.Wa
 	fmt.Printf("Location created: %v", event.GetPayload())
 	jsonOutput, _ := json.Marshal(event.GetPayload())
 
-	msgRabbitmq := amqp.Publishing{
+	msg := amqp.Publishing{
 		ContentType: "application/json",
 		Body:        jsonOutput,
 	}
 
 	h.RabbitMQChannel.Publish(
-		"amq.direct", // exchange
-		"",           // key name
-		false,        // mandatory
-		false,        // immediate
-		msgRabbitmq,  // message to publish
+		"amq.direct",       // exchange
+		"location.created", // key name
+		false,              // mandatory
+		false,              // immediate
+		msg,                // message to publish
 	)
 }

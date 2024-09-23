@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+
 	_ "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event/handler"
@@ -13,7 +14,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/penglongli/gin-metrics/ginmetrics"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -25,13 +26,13 @@ import (
 
 //	@contact.name	App API Support
 //	@contact.url	https://github.com/Inteli-College/2024-2A-T02-EC11-G01
-//	@contact.email	gomedicine@inteli.edu.br
+//	@contact.email	artemis@inteli.edu.br
 
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@host	localhost:8080
-//	@BasePath	/api/v1
+// @host	localhost:8080
+// @BasePath	/api/v1
 func main() {
 	/////////////////////// Configs /////////////////////////
 	conn, isSet := os.LookupEnv("POSTGRES_URL")
@@ -88,11 +89,11 @@ func main() {
 		ExposeHeaders:    []string{"*"},
 		AllowCredentials: true,
 	}))
-	
+
 	m := ginmetrics.GetMonitor()
 	m.SetMetricPath("/api/v1/metrics")
 	m.Use(router)
-	
+
 	router.GET("/api/v1/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "ok",

@@ -66,10 +66,11 @@ func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 // @Router /locations/{id} [get]
 func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 	var input location_usecase.FindLocationByIdInputDTO
-	if err := c.BindJSON(&input); err != nil {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
 	}
+	input.Id = id
 	res, err := location_usecase.NewFindLocationByIdUseCase(h.LocationRepository).Execute(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
