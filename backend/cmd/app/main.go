@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-
 	_ "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event/handler"
@@ -64,7 +63,7 @@ func main() {
 		RabbitMQChannel: ch,
 	})
 
-	/////////////////////// U'se Cases /////////////////////////
+	/////////////////////// Use Cases /////////////////////////
 	pu := NewCreatePredictionUseCase(db, eventDispatcher)
 
 	/////////////////////// Web Handlers /////////////////////////

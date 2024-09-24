@@ -7,7 +7,7 @@ import (
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/database"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
 	web_handler "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/web/handler"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/google/wire"
@@ -24,13 +24,13 @@ var setEventDispatcherDependency = wire.NewSet(
 )
 
 var setLocationRepositoryDependency = wire.NewSet(
-	database.NewLocationRepositoryGorm,
-	wire.Bind(new(entity.LocationRepository), new(*database.LocationRepositoryGorm)),
+	repository.NewLocationRepositoryGorm,
+	wire.Bind(new(entity.LocationRepository), new(*repository.LocationRepositoryGorm)),
 )
 
 var setPredictionRepositoryDependency = wire.NewSet(
-	database.NewPredictionRepositoryGorm,
-	wire.Bind(new(entity.PredictionRepository), new(*database.PredictionRepositoryGorm)),
+	repository.NewPredictionRepositoryGorm,
+	wire.Bind(new(entity.PredictionRepository), new(*repository.PredictionRepositoryGorm)),
 )
 
 var setLocationWebHandlers = wire.NewSet(
