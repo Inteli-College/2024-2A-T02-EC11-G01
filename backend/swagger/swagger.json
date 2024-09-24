@@ -2,12 +2,12 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a.",
-        "title": "Manager API",
+        "title": "App API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Manager API Support",
-            "url": "https://github.com/Inteli-College/2024-1B-T02-EC10-G04",
-            "email": "gomedicine@inteli.edu.br"
+            "name": "App API Support",
+            "url": "https://github.com/Inteli-College/2024-2A-T02-EC11-G01",
+            "email": "artemis@inteli.edu.br"
         },
         "license": {
             "name": "Apache 2.0",
@@ -455,6 +455,9 @@
                 "coordinate_y": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "location_id": {
                     "type": "string"
                 },
@@ -486,14 +489,6 @@
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "\"Type: Bearer token\"",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }

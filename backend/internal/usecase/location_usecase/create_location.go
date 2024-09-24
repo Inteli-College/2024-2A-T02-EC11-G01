@@ -1,26 +1,12 @@
 package location_usecase
 
 import (
-	"time"
+	"context"
 
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
-	"github.com/google/uuid"
 )
-
-type CreateLocationInputDTO struct {
-	Name      string `json:"name"`
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
-}
-
-type CreateLocationOutputDTO struct {
-	Id        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Latitude  string    `json:"latitude"`
-	Longitude string    `json:"longitude"`
-	CreatedAt time.Time `json:"created_at"`
-}
 
 type CreateLocationUseCase struct {
 	LocationCreated    events.EventInterface
@@ -40,22 +26,22 @@ func NewCreateLocationUseCase(
 	}
 }
 
-func (u *CreateLocationUseCase) Execute(input CreateLocationInputDTO) (*CreateLocationOutputDTO, error) {
-	location, err := entity.NewLocation(input.Name, input.Latitude, input.Longitude)
+func (u *CreateLocationUseCase) Execute(ctx context.Context, input *dto.CreateLocationInputDTO) (*dto.LocationOutputDTO, error) {
+	location, err := entity.NewLocation(&input.Name, &input.CoordinateX, &input.CoordinateY)
 	if err != nil {
 		return nil, err
 	}
-	res, err := u.LocationRepository.CreateLocation(location)
+	res, err := u.LocationRepository.CreateLocation(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	dto := &CreateLocationOutputDTO{
-		Id:        res.Id,
-		Name:      res.Name,
-		Latitude:  res.Latitude,
-		Longitude: res.Longitude,
-		CreatedAt: res.CreatedAt,
+	dto := &dto.LocationOutputDTO{
+		LocationId:  res.LocationId.String(),
+		Name:        res.Name,
+		CoordinateX: res.CoordinateX,
+		CoordinateY: res.CoordinateY,
+		CreatedAt:   res.CreatedAt,
 	}
 
 	u.LocationCreated.SetPayload(dto)

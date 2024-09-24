@@ -3,7 +3,9 @@ CREATE TABLE "locations" (
     "location_id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "coordinate_x" TEXT NOT NULL,
-    "coordinate_y" JSONB NOT NULL,
+    "coordinate_y" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "locations_pkey" PRIMARY KEY ("location_id")
 );
@@ -16,6 +18,7 @@ CREATE TABLE "predictions" (
     "output" JSONB,
     "location_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "predictions_pkey" PRIMARY KEY ("prediction_id")
 );

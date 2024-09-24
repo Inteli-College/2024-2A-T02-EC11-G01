@@ -1,18 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"os"
 
-	_ "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event/handler"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
+	ourSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/swagger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/penglongli/gin-metrics/ginmetrics"
 	amqp "github.com/rabbitmq/amqp091-go"
 	swaggerFiles "github.com/swaggo/files"
@@ -34,46 +32,26 @@ import (
 // @host	localhost:8080
 // @BasePath	/api/v1
 func main() {
-	/////////////////////// Configs /////////////////////////
-	conn, isSet := os.LookupEnv("POSTGRES_URL")
-	if !isSet {
-		log.Fatalf("POSTGRES_URL is not set")
-	}
-
-	rabbitmqChannel, isSet := os.LookupEnv("RABBITMQ_CHANNEL")
-	if !isSet {
-		log.Fatalf("RABBITMQ_CHANNEL is not set")
-	}
-
-	db, err := configs.SetupPostgres(conn)
-	if err != nil {
-		panic(err)
-	}
-
-	ch, err := configs.SetupRabbitMQChannel(rabbitmqChannel)
-	if err != nil {
-		panic(err)
-	}
-
+	godotenv.Load()
 	/////////////////////// Event Dispatcher /////////////////////////
-	eventDispatcher := events.NewEventDispatcher()
-	eventDispatcher.Register("LocationCreated", &handler.LocationCreatedHandler{
-		RabbitMQChannel: ch,
-	})
-	eventDispatcher.Register("PredictionCreated", &handler.PredictionCreatedHandler{
-		RabbitMQChannel: ch,
-	})
+	eventDispatcher, _ := NewEventDispatcher()
+
+	locationCreatedHandler, _ := NewLocationCreatedHandler()
+	eventDispatcher.Register("LocationCreated", locationCreatedHandler)
+
+	predicitonCreatedHandler, _ := NewPredictionCreatedHandler()
+	eventDispatcher.Register("PredictionCreated", predicitonCreatedHandler)
 
 	/////////////////////// U'se Cases /////////////////////////
-	pu := NewCreatePredictionUseCase(db, eventDispatcher)
+	pu, _ := NewCreatePredictionUseCase()
 
 	/////////////////////// Web Handlers /////////////////////////
-	lh, err := NewLocationWebHandlers(db, eventDispatcher)
+	lh, err := NewLocationWebHandlers()
 	if err != nil {
 		panic(err)
 	}
 
-	ph, err := NewPredicitonWebHandlers(db, eventDispatcher)
+	ph, err := NewPredicitonWebHandlers()
 	if err != nil {
 		panic(err)
 	}
@@ -102,27 +80,37 @@ func main() {
 
 	api := router.Group("/api/v1")
 
+	///////////////////// Swagger //////////////////////
+
+	if swaggerHost, ok := os.LookupEnv("SWAGGER_HOST"); ok {
+
+		ourSwagDocs.SwaggerInfo.Host = swaggerHost
+	}
+
 	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	///////////////////////// Predictions ///////////////////////////
 
 	{
 		predictionsGroup := api.Group("/predictions")
 		{
-			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePredictionHandler)
-			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictionsHandler)
-			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
-			predictionsGroup.PUT("/:id", ph.PredictionWebHandlers.UpdatePredictionHandler)
-			predictionsGroup.DELETE("/:id", ph.PredictionWebHandlers.DeletePredictionHandler)
+			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePrediction)
+			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictions)
+			predictionsGroup.GET("/location/:location_id", ph.PredictionWebHandlers.FindAllPredictionsByLocationId)
+			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByPredictionId)
 		}
 	}
+
+	///////////////////////// Locations ///////////////////////////
 
 	{
 		locationsGroup := api.Group("/locations")
 		{
-			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocationHandler)
-			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocationsHandler)
-			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationByIdHandler)
-			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocationHandler)
-			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocationHandler)
+			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocation)
+			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocations)
+			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationById)
+			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocation)
+			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocation)
 		}
 	}
 
@@ -133,23 +121,27 @@ func main() {
 	}()
 
 	/////////////////////// Predictions Consumer /////////////////////////
+
 	msgChan := make(chan amqp.Delivery)
+	rabbitmqConsumer, _ := NewRabbitMQConsumer()
 	go func() {
-		if err := rabbitmq.NewRabbitMQConsumer(ch).Consume(msgChan, "predictions"); err != nil {
+		if err := rabbitmqConsumer.Consume(msgChan, "predictions"); err != nil {
 			panic(err)
 		}
 	}()
 
 	for msg := range msgChan {
-		var prediction prediction_usecase.CreatePredictionInputDTO
+		var prediction dto.CreatePredictionInputDTO
+		ctx := context.Background()
 		err := json.Unmarshal(msg.Body, &prediction)
 		if err != nil {
 			panic(err)
 		}
-		res, err := pu.Execute(prediction)
+		res, err := pu.Execute(ctx, &prediction)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("Prediciton created: %v", res)
 	}
 }
+

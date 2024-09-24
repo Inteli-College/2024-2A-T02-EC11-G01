@@ -1,150 +1,183 @@
 package handler
 
 import (
+	"context"
 	"net/http"
+	"strconv"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-type PredictionHandlers struct {
-	EventDispatcher        events.EventDispatcherInterface
-	PredictionRepository   entity.PredictionRepository
-	PredictionCreatedEvent events.EventInterface
+type PredictionHandler struct {
+	createPredictionUsecase               *prediction_usecase.CreatePredictionUseCase
+	findPredictionByIdUsecase             *prediction_usecase.FindPredictionByIdUseCase
+	findAllPredictionsUsecase             *prediction_usecase.FindAllPredictionsUseCase
+	findAllPredictionsByLocationIdUsecase *prediction_usecase.FindAllPredictionsByLocationIdUsecase
 }
 
-func NewPredictionHandlers(
-	eventDispatcher events.EventDispatcherInterface,
-	predictionRepository entity.PredictionRepository,
-	predictionCreatedEvent events.EventInterface,
-) *PredictionHandlers {
-	return &PredictionHandlers{
-		EventDispatcher:        eventDispatcher,
-		PredictionRepository:   predictionRepository,
-		PredictionCreatedEvent: predictionCreatedEvent,
+func NewPredictionHandler(locationRepo *repository.PredictionRepositoryGorm, eventDispatcher events.EventDispatcherInterface, predictionCreatedEvent events.EventInterface) *PredictionHandler {
+	handler := &PredictionHandler{
+		createPredictionUsecase:               prediction_usecase.NewCreatePredictionUseCase(predictionCreatedEvent, locationRepo, eventDispatcher),
+		findPredictionByIdUsecase:             prediction_usecase.NewFindPredictionByIdUseCase(locationRepo),
+		findAllPredictionsUsecase:             prediction_usecase.NewFindAllPredictionsUseCase(locationRepo),
+		findAllPredictionsByLocationIdUsecase: prediction_usecase.NewFindAllPredictionsByLocationIdUsecase(locationRepo),
 	}
+
+	return handler
 }
 
-// CreatePredictionHandler
-// @Summary Create a new Prediction
-// @Description Create a new Prediction in the system
+// CreatePrediction godoc
+// @Summary Create a new prediction
+// @Description Create a new prediction
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param input body prediction_usecase.CreatePredictionInputDTO true "Prediction entity to create"
-// @Success 200 {object} prediction_usecase.CreatePredictionOutputDTO
+// @Param prediction body dto.CreatePredictionInputDTO true "Create Prediction Input"
+// @Success 201 {object} dto.PredictionDTO
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /predictions [post]
-func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
-	var input prediction_usecase.CreatePredictionInputDTO
-	if err := c.BindJSON(&input); err != nil {
+func (h *PredictionHandler) CreatePrediction(c *gin.Context) {
+	var input dto.CreatePredictionInputDTO
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	res, err := prediction_usecase.NewCreatePredictionUseCase(
-		h.PredictionCreatedEvent,
-		h.PredictionRepository,
-		h.EventDispatcher,
-	).Execute(input)
+
+	ctx := context.Background()
+	prediction, err := h.createPredictionUsecase.Execute(ctx, &input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, res)
+
+	c.JSON(http.StatusCreated, prediction)
 }
 
-// FindPredictionByIdHandler
-// @Summary Retrieve a Prediction by ID
-// @Description Get details of a specific Prediction by its ID
+// FindAllPredictions godoc
+// @Summary Get all predictions
+// @Description Get a list of all predictions
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param id path string true "Prediction ID"
-// @Success 200 {object} prediction_usecase.FindPredictionOutputDTO
-// @Router /predictions/{id} [get]
-func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
-	var input prediction_usecase.FindPredictionByIdInputDTO
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	input.Id = id
-	res, err := prediction_usecase.NewFindPredictionByIdUseCase(h.PredictionRepository).Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, res)
-}
-
-// FindAllPredictionsHandler
-// @Summary Retrieve all Predictions
-// @Description Get a list of all Predictions
-// @Tags Predictions
-// @Accept json
-// @Produce json
-// @Success 200 {array} prediction_usecase.FindAllPredictionsOutputDTO
+// @Param limit query int false "Limit the number of results"
+// @Param offset query int false "Offset for pagination"
+// @Success 200 {array} dto.PredictionDTO
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /predictions [get]
-func (h *PredictionHandlers) FindAllPredictionsHandler(c *gin.Context) {
-	res, err := prediction_usecase.NewFindAllPredictionsUseCase(h.PredictionRepository).Execute()
+func (h *PredictionHandler) FindAllPredictions(c *gin.Context) {
+	ctx := context.Background()
+
+	limitStr := c.DefaultQuery("limit", "")
+	offsetStr := c.DefaultQuery("offset", "")
+
+	var limit *int
+	var offset *int
+
+	if limitStr != "" {
+		limitVerified, err := strconv.Atoi(limitStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit"})
+			return
+		}
+		limit = &limitVerified
+	}
+
+	if offsetStr != "" {
+		offsetVerified, err := strconv.Atoi(offsetStr) // valor padrão 0
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset"})
+			return
+		}
+		offset = &offsetVerified
+	}
+
+	predictions, err := h.findAllPredictionsUsecase.Execute(ctx, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, res)
+
+	c.JSON(http.StatusOK, predictions)
 }
 
-// UpdatePredictionHandler
-// @Summary Update a Prediction
-// @Description Update a specific Prediction entity
+// FindAllPredictionsByLocationId godoc
+// @Summary Get predictions by location Id
+// @Description Get predictions by location Id
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param location_id path string true "Location ID"
+// @Param limit query int false "Limit the number of results"
+// @Param offset query int false "Offset for pagination"
+// @Success 200 {array} dto.PredictionDTO
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /predictions/location/{location_id} [get]
+func (h *PredictionHandler) FindAllPredictionsByLocationId(c *gin.Context) {
+	locationId := c.Param("location_id")
+	ctx := context.Background()
+
+	limitStr := c.DefaultQuery("limit", "")
+	offsetStr := c.DefaultQuery("offset", "")
+
+	var limit *int
+	var offset *int
+
+	if limitStr != "" {
+		limitVerified, err := strconv.Atoi(limitStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit"})
+			return
+		}
+		limit = &limitVerified
+	}
+
+	if offsetStr != "" {
+		offsetVerified, err := strconv.Atoi(offsetStr) // valor padrão 0
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset"})
+			return
+		}
+		offset = &offsetVerified
+	}
+
+	var input dto.FindPredictionByLocationIdInputDTO
+	input.LocationId = locationId
+
+	location, err := h.findAllPredictionsByLocationIdUsecase.Execute(ctx, &input, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, location)
+}
+
+// FindPredictionByPredictionId godoc
+// @Summary Find prediction by id
+// @Description Find prediction by id
 // @Tags Predictions
 // @Accept json
 // @Produce json
 // @Param id path string true "Prediction ID"
-// @Param input body prediction_usecase.UpdatePredictionInputDTO true "Prediction entity to update"
-// @Success 200 {object} prediction_usecase.UpdatePredictionOutputDTO
-// @Router /predictions/{id} [put]
-func (h *PredictionHandlers) UpdatePredictionHandler(c *gin.Context) {
-	var input prediction_usecase.UpdatePredictionInputDTO
-	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	input.Id = id
-	res, err := prediction_usecase.NewUpdatePredictionUseCase(h.PredictionRepository).Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, res)
-}
+// @Success 200 {object} dto.PredictionDTO
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /predictions/{id} [get]
+func (h *PredictionHandler) FindPredictionByPredictionId(c *gin.Context) {
+	ctx := context.Background()
+	id := c.Param("id")
 
-// DeletePredictionHandler
-// @Summary Delete a Prediction
-// @Description Remove a specific Prediction from the system
-// @Tags Predictions
-// @Accept json
-// @Produce json
-// @Param id path string true "Prediction ID"
-// @Success 200 {string} string "Prediction deleted successfully"
-// @Router /predictions/{id} [delete]
-func (h *PredictionHandlers) DeletePredictionHandler(c *gin.Context) {
-	var input prediction_usecase.DeletePredictionInputDTO
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	input.Id = id
-	err = prediction_usecase.NewDeletePredictionUseCase(h.PredictionRepository).Execute(input)
+	var input dto.FindPredictionByIdInputDTO
+	input.PredictionId = id
+
+	prediction, err := h.findPredictionByIdUsecase.Execute(ctx, &input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Prediction deleted successfully"})
+
+	c.JSON(http.StatusOK, prediction)
 }

@@ -1,10 +1,12 @@
 package prediction_usecase
 
 import (
+	"context"
+	"encoding/json"
+
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 )
-
-type FindAllPredictionsOutputDTO []*FindPredictionOutputDTO
 
 type FindAllPredictionsUseCase struct {
 	PredictionRepository entity.PredictionRepository
@@ -16,22 +18,26 @@ func NewFindAllPredictionsUseCase(predictionRepository entity.PredictionReposito
 	}
 }
 
-func (u *FindAllPredictionsUseCase) Execute() (*FindAllPredictionsOutputDTO, error) {
-	res, err := u.PredictionRepository.FindAllPredictions()
+func (u *FindAllPredictionsUseCase) Execute(ctx context.Context, limit *int, offset *int) (dto.FindAllPredictionsOutputDTO, error) {
+	res, err := u.PredictionRepository.FindAllPredictions(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	output := make(FindAllPredictionsOutputDTO, len(res))
+	output := make(dto.FindAllPredictionsOutputDTO, len(res))
 	for i, prediction := range res {
-		output[i] = &FindPredictionOutputDTO{
-			Id:             prediction.Id,
-			RawImage:       prediction.RawImage,
-			AnnotatedImage: prediction.AnnotatedImage,
-			Detections:     prediction.Detections,
-			LocationId:     prediction.LocationId,
-			CreatedAt:      prediction.CreatedAt,
-			UpdatedAt:      prediction.UpdatedAt,
+		var detections map[string]interface{}
+		jsonErr := json.Unmarshal(prediction.Output, &detections)
+		if jsonErr != nil {
+			return nil, jsonErr
+		}
+		output[i] = &dto.PredictionDTO{
+			PredictionId:    prediction.PredictionId.String(),
+			RawImagePath:    prediction.RawImagePath,
+			OutputImagePath: prediction.OutputImagePath,
+			Output:          detections,
+			LocationId:      prediction.LocationId.String(),
+			CreatedAt:       prediction.CreatedAt,
 		}
 	}
-	return &output, nil
+	return output, nil
 }

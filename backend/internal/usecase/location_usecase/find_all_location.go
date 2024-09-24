@@ -1,8 +1,11 @@
 package location_usecase
 
-import "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
+import (
+	"context"
 
-type FindAllLocationsOutputDTO []*FindLocationOutputDTO
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
+)
 
 type FindAllLocationsUseCase struct {
 	LocationRepository entity.LocationRepository
@@ -14,21 +17,20 @@ func NewFindAllLocationsUseCase(locationRepository entity.LocationRepository) *F
 	}
 }
 
-func (u *FindAllLocationsUseCase) Execute() (*FindAllLocationsOutputDTO, error) {
-	res, err := u.LocationRepository.FindAllLocations()
+func (u *FindAllLocationsUseCase) Execute(ctx context.Context) (dto.FindAllLocationsOutputDTO, error) {
+	res, err := u.LocationRepository.GetAllLocations(ctx)
 	if err != nil {
 		return nil, err
 	}
-	output := make(FindAllLocationsOutputDTO, len(res))
+	output := make(dto.FindAllLocationsOutputDTO, len(res))
 	for i, location := range res {
-		output[i] = &FindLocationOutputDTO{
-			Id:        location.Id,
-			Name:      location.Name,
-			Latitude:  location.Latitude,
-			Longitude: location.Longitude,
-			CreatedAt: location.CreatedAt,
-			UpdatedAt: location.UpdatedAt,
+		output[i] = &dto.LocationOutputDTO{
+			LocationId:  location.LocationId.String(),
+			Name:        location.Name,
+			CoordinateX: location.CoordinateX,
+			CoordinateY: location.CoordinateY,
+			CreatedAt:   location.CreatedAt,
 		}
 	}
-	return &output, nil
+	return output, nil
 }

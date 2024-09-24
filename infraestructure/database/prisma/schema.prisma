@@ -11,8 +11,10 @@ model locations {
   location_id  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   coordinate_x String
-  coordinate_y Json
+  coordinate_y String
   predictions  predictions[]
+  created_at   DateTime      @default(dbgenerated("now()"))
+  updated_at   DateTime      @default(dbgenerated("now()"))
 }
 
 model predictions {
@@ -23,4 +25,5 @@ model predictions {
   location_id       String    @db.Uuid
   locations         locations @relation(fields: [location_id], references: [location_id])
   created_at        DateTime  @default(dbgenerated("now()"))
+  updated_at        DateTime  @default(dbgenerated("now()"))
 }

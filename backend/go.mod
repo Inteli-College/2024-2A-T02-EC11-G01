@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
+	github.com/joho/godotenv v1.5.1
 	github.com/penglongli/gin-metrics v0.1.10
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/spf13/viper v1.19.0

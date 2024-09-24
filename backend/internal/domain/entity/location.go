@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -13,11 +14,11 @@ var (
 )
 
 type LocationRepository interface {
-	CreateLocation(location *Location) (*Location, error)
-	FindAllLocations() ([]*Location, error)
-	FindLocationById(id uuid.UUID) (*Location, error)
-	UpdateLocation(location *Location) (*Location, error)
-	DeleteLocation(id uuid.UUID) error
+	CreateLocation(ctx context.Context, input *Location) (*Location, error)
+	GetAllLocations(ctx context.Context) ([]*Location, error)
+	GetLocationById(ctx context.Context, locationId *uuid.UUID) (*Location, error)
+	UpdateLocation(ctx context.Context, input *Location) (*Location, error)
+	DeleteLocation(ctx context.Context, locationId *uuid.UUID) error
 }
 
 type Location struct {
@@ -29,13 +30,13 @@ type Location struct {
 	UpdatedAt   time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
 
-func NewLocation(name string, latitude string, longitude string) (*Location, error) {
+func NewLocation(name *string, latitude *string, longitude *string) (*Location, error) {
 	location := &Location{
-		Id:        uuid.New(),
-		Name:      name,
-		Latitude:  latitude,
-		Longitude: longitude,
-		CreatedAt: time.Now(),
+		LocationId:  uuid.New(),
+		Name:        *name,
+		CoordinateX: *latitude,
+		CoordinateY: *longitude,
+		CreatedAt:   time.Now(),
 	}
 	if err := location.Validate(); err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func NewLocation(name string, latitude string, longitude string) (*Location, err
 }
 
 func (l *Location) Validate() error {
-	if l.Id == uuid.Nil || l.Name == "" || l.Latitude == "" || l.Longitude == "" || l.CreatedAt.IsZero() {
+	if l.LocationId == uuid.Nil || l.Name == "" || l.CoordinateX == "" || l.CoordinateY == "" || l.CreatedAt.IsZero() {
 		return ErrInvalidLocation
 	}
 	return nil

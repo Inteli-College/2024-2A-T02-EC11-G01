@@ -2,57 +2,45 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"log"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/mappers"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type PredictionRepository struct {
+type PredictionRepositoryGorm struct {
 	db *gorm.DB
 }
 
-func NewPredictionRepository(db *gorm.DB) *PredictionRepository {
-	log.Printf("Prediction DB address: %p\n", db)
-	return &PredictionRepository{
+func NewPredictionRepositoryGorm(db *gorm.DB) *PredictionRepositoryGorm {
+	return &PredictionRepositoryGorm{
 		db: db,
 	}
 }
 
-func (r *PredictionRepository) Create(ctx context.Context, predictionDTO *dto.CreatePredictionInputDTO) (*dto.PredictionDTO, error) {
-	outputJson, json_err := json.Marshal(predictionDTO.Output)
-
-	if json_err != nil {
-		return nil, json_err
-	}
-
-	prediction := entity.NewPrediction(predictionDTO.RawImagePath, predictionDTO.OutputImagePath, outputJson, predictionDTO.LocationId)
-
-	if err := r.db.WithContext(ctx).Create(prediction).Error; err != nil {
+func (r *PredictionRepositoryGorm) CreatePrediction(ctx context.Context, input *entity.Prediction) (*entity.Prediction, error) {
+	if err := r.db.WithContext(ctx).Create(input).Error; err != nil {
 		return nil, err
 	}
 
-	return mappers.MapPredictionEntityToDTO(prediction), nil
+	return input, nil
 }
 
-func (r *PredictionRepository) GetByID(ctx context.Context, id *string) (*dto.PredictionDTO, error) {
+func (r *PredictionRepositoryGorm) FindPredictionById(ctx context.Context, id *uuid.UUID) (*entity.Prediction, error) {
 	var prediction entity.Prediction
 
 	if err := r.db.WithContext(ctx).First(&prediction, "prediction_id = ?", *id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil // TODO: return personalized errors
+			return nil, err // TODO: return personalized errors
 		}
 		return nil, err
 	}
 
-	return mappers.MapPredictionEntityToDTO(&prediction), nil
+	return &prediction, nil
 }
 
-func (r *PredictionRepository) GetAllByLocationID(ctx context.Context, locationID *string, limit *int, offset *int, orders ...string) ([]*dto.PredictionDTO, error) {
+func (r *PredictionRepositoryGorm) FindAllPredictionsByLocationID(ctx context.Context, locationID *uuid.UUID, limit *int, offset *int, orders ...string) ([]*entity.Prediction, error) {
 	var predictions []*entity.Prediction
 	query := r.db.WithContext(ctx)
 
@@ -64,15 +52,10 @@ func (r *PredictionRepository) GetAllByLocationID(ctx context.Context, locationI
 		return nil, err // TODO: return personalized errors
 	}
 
-	predictionsOutputs := make([]*dto.PredictionDTO, 0, len(predictions))
-	for _, prediction := range predictions {
-		predictionsOutputs = append(predictionsOutputs, mappers.MapPredictionEntityToDTO(prediction))
-	}
-
-	return predictionsOutputs, nil
+	return predictions, nil
 }
 
-func (r *PredictionRepository) GetAll(ctx context.Context, limit *int, offset *int, orders ...string) ([]*dto.PredictionDTO, error) {
+func (r *PredictionRepositoryGorm) FindAllPredictions(ctx context.Context, limit *int, offset *int, orders ...string) ([]*entity.Prediction, error) {
 	var predictions []*entity.Prediction
 	query := r.db.WithContext(ctx)
 
@@ -84,15 +67,10 @@ func (r *PredictionRepository) GetAll(ctx context.Context, limit *int, offset *i
 		return nil, err
 	}
 
-	predictionsOutputs := make([]*dto.PredictionDTO, 0, len(predictions))
-	for _, prediction := range predictions {
-		predictionsOutputs = append(predictionsOutputs, mappers.MapPredictionEntityToDTO(prediction))
-	}
-
-	return predictionsOutputs, nil
+	return predictions, nil
 }
 
-func (r *PredictionRepository) addOrderToQuery(query *gorm.DB, orders []string) *gorm.DB {
+func (r *PredictionRepositoryGorm) addOrderToQuery(query *gorm.DB, orders []string) *gorm.DB {
 	if orders != nil && len(orders) > 0 {
 		for _, order := range orders {
 			query = query.Order(order)
@@ -102,7 +80,7 @@ func (r *PredictionRepository) addOrderToQuery(query *gorm.DB, orders []string) 
 	return query.Order("created_at DESC")
 }
 
-func (r *PredictionRepository) addLimitToQuery(query *gorm.DB, limit *int) *gorm.DB {
+func (r *PredictionRepositoryGorm) addLimitToQuery(query *gorm.DB, limit *int) *gorm.DB {
 	if limit != nil {
 		return query.Limit(*limit)
 	}
@@ -110,7 +88,7 @@ func (r *PredictionRepository) addLimitToQuery(query *gorm.DB, limit *int) *gorm
 	return query
 }
 
-func (r *PredictionRepository) addOffsetToQuery(query *gorm.DB, offset *int) *gorm.DB {
+func (r *PredictionRepositoryGorm) addOffsetToQuery(query *gorm.DB, offset *int) *gorm.DB {
 	if offset != nil {
 		return query.Offset(*offset)
 	}

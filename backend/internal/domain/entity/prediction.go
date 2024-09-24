@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -13,11 +14,10 @@ var (
 )
 
 type PredictionRepository interface {
-	CreatePrediction(prediction *Prediction) (*Prediction, error)
-	FindAllPredictions() ([]*Prediction, error)
-	FindPredictionById(id uuid.UUID) (*Prediction, error)
-	UpdatePrediction(prediction *Prediction) (*Prediction, error)
-	DeletePrediction(id uuid.UUID) error
+	CreatePrediction(ctx context.Context, prediction *Prediction) (*Prediction, error)
+	FindAllPredictions(ctx context.Context, limit *int, offset *int, orders ...string) ([]*Prediction, error)
+	FindPredictionById(ctx context.Context, id *uuid.UUID) (*Prediction, error)
+	FindAllPredictionsByLocationID(ctx context.Context, locationID *uuid.UUID, limit *int, offset *int, orders ...string) ([]*Prediction, error)
 }
 
 type Prediction struct {
@@ -30,12 +30,13 @@ type Prediction struct {
 	UpdatedAt       time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
 
-func NewPrediction(rawImagePath string, outputImagePath string, output []byte, locationId uuid.UUID) (*Prediction, error) {
+func NewPrediction(rawImagePath *string, outputImagePath *string, output []byte, locationId *uuid.UUID) (*Prediction, error) {
 	prediciton := &Prediction{
-		RawImagePath:    rawImagePath,
-		OutputImagePath: outputImagePath,
+		PredictionId:    uuid.New(),
+		RawImagePath:    *rawImagePath,
+		OutputImagePath: *outputImagePath,
 		Output:          output,
-		LocationId:      locationId,
+		LocationId:      *locationId,
 		CreatedAt:       time.Now(),
 	}
 	if err := prediciton.Validate(); err != nil {

@@ -13,8 +13,8 @@ import (
 )
 
 var db *gorm.DB
-var locationRepo *LocationRepository
-var predictionRepo *PredictionRepository
+var locationRepo *LocationRepositoryGorm
+var predictionRepo *PredictionRepositoryGorm
 
 func TestMain(m *testing.M) {
 	loadRepo := flag.String("loadrepo", "default", "Which repository must load")
@@ -36,13 +36,13 @@ func TestMain(m *testing.M) {
 
 	switch *loadRepo {
 	case "location":
-		locationRepo = NewLocationRepository(db)
+		locationRepo = NewLocationRepositoryGorm(db)
 	case "prediction":
 		log.Println("Loading only prediction")
-		predictionRepo = NewPredictionRepository(db)
+		predictionRepo = NewPredictionRepositoryGorm(db)
 	default:
-		locationRepo = NewLocationRepository(db)
-		predictionRepo = NewPredictionRepository(db)
+		locationRepo = NewLocationRepositoryGorm(db)
+		predictionRepo = NewPredictionRepositoryGorm(db)
 
 	}
 

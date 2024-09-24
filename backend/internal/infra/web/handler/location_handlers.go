@@ -1,40 +1,35 @@
-package web
+package handler
 
 import (
 	"context"
 	"net/http"
 
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
 	usecase "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/location_usecase"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/gin-gonic/gin"
 )
 
 type LocationHandler struct {
 	createLocationUseCase   *usecase.CreateLocationUseCase
-	findLocationByIdUseCase *usecase.FindLocationByIdUseCase
+	findLocationByIdUseCase *usecase.FindLocationByIdUsecase
 	updateLocationUseCase   *usecase.UpdateLocationUseCase
 	deleteLocationUseCase   *usecase.DeleteLocationUseCase
 	findAllLocationsUseCase *usecase.FindAllLocationsUseCase
 }
 
-func NewLocationHandler(locationRepo *repository.LocationRepository) *LocationHandler {
+func NewLocationHandler(locationRepo *repository.LocationRepositoryGorm, eventDispatcher events.EventDispatcherInterface,
+	locationRepository entity.LocationRepository, locationCreatedEvent events.EventInterface) *LocationHandler {
 	handler := &LocationHandler{
-		createLocationUseCase:   usecase.NewCreateLocationUseCase(locationRepo),
+		createLocationUseCase:   usecase.NewCreateLocationUseCase(locationCreatedEvent, locationRepo, eventDispatcher),
 		findLocationByIdUseCase: usecase.NewFindLocationByIdUseCase(locationRepo),
 		updateLocationUseCase:   usecase.NewUpdateLocationUseCase(locationRepo),
 		deleteLocationUseCase:   usecase.NewDeleteLocationUseCase(locationRepo),
 		findAllLocationsUseCase: usecase.NewFindAllLocationsUseCase(locationRepo),
 	}
 	return handler
-}
-
-func (h *LocationHandler) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("", h.CreateLocation)
-	router.GET("", h.FindAllLocations)
-	router.GET("/:id", h.FindLocationById)
-	router.PUT("/:id", h.UpdateLocation)
-	router.DELETE("/:id", h.DeleteLocation)
 }
 
 // CreateLocation godoc
@@ -98,7 +93,11 @@ func (h *LocationHandler) FindLocationById(c *gin.Context) {
 	id := c.Param("id")
 	ctx := context.Background()
 
-	location, err := h.findLocationByIdUseCase.Execute(ctx, id)
+	var input dto.FindLocationByIdInputDTO
+
+	input.LocationId = id
+
+	location, err := h.findLocationByIdUseCase.Execute(ctx, &input)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -120,14 +119,17 @@ func (h *LocationHandler) FindLocationById(c *gin.Context) {
 // @Router /locations/{id} [put]
 func (h *LocationHandler) UpdateLocation(c *gin.Context) {
 	id := c.Param("id")
-	var input dto.CreateLocationInputDTO
+
+	var input dto.UpdateLocationInputDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	input.LocationId = id
+
 	ctx := context.Background()
-	location, err := h.updateLocationUseCase.Execute(ctx, id, &input)
+	location, err := h.updateLocationUseCase.Execute(ctx, &input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -150,7 +152,10 @@ func (h *LocationHandler) DeleteLocation(c *gin.Context) {
 	id := c.Param("id")
 	ctx := context.Background()
 
-	err := h.deleteLocationUseCase.Execute(ctx, id)
+	var input dto.DeleteLocationInputDTO
+	input.LocationId = id
+
+	err := h.deleteLocationUseCase.Execute(ctx, &input)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

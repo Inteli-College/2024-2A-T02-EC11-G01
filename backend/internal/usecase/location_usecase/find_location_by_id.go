@@ -1,13 +1,12 @@
 package location_usecase
 
 import (
+	"context"
+
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/google/uuid"
 )
-
-type FindLocationByIdInputDTO struct {
-	Id uuid.UUID `json:"id"`
-}
 
 type FindLocationByIdUsecase struct {
 	LocationRepository entity.LocationRepository
@@ -19,17 +18,21 @@ func NewFindLocationByIdUseCase(locationRepository entity.LocationRepository) *F
 	}
 }
 
-func (u *FindLocationByIdUsecase) Execute(input FindLocationByIdInputDTO) (*FindLocationOutputDTO, error) {
-	location, err := u.LocationRepository.FindLocationById(input.Id)
+func (u *FindLocationByIdUsecase) Execute(ctx context.Context, input *dto.FindLocationByIdInputDTO) (*dto.LocationOutputDTO, error) {
+	locationUUID, errUUID := uuid.Parse(input.LocationId)
+	if errUUID != nil {
+		return nil, errUUID
+	}
+
+	location, err := u.LocationRepository.GetLocationById(ctx, &locationUUID)
 	if err != nil {
 		return nil, err
 	}
-	return &FindLocationOutputDTO{
-		Id:        location.Id,
-		Name:      location.Name,
-		Latitude:  location.Latitude,
-		Longitude: location.Longitude,
-		CreatedAt: location.CreatedAt,
-		UpdatedAt: location.UpdatedAt,
+	return &dto.LocationOutputDTO{
+		LocationId:  location.LocationId.String(),
+		Name:        location.Name,
+		CoordinateX: location.CoordinateX,
+		CoordinateY: location.CoordinateY,
+		CreatedAt:   location.CreatedAt,
 	}, nil
 }
