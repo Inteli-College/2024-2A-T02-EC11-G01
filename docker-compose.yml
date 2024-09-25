@@ -52,5 +52,15 @@ services:
       retries: 20
     restart: always
 
+  predictor:
+    build:
+      context: ./predictor
+      dockerfile: Dockerfile
+    container_name: predictor
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+
 volumes:
   postgres_data:
