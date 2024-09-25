@@ -1,13 +1,15 @@
 package configs
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"sync"
-
-	"fmt"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func setupPostgres() (*gorm.DB, error) {
@@ -19,7 +21,18 @@ func setupPostgres() (*gorm.DB, error) {
 		os.Getenv("DATABASE_PORT"),
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	logger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold: time.Second,
+			LogLevel:      logger.Info,
+			Colorful:      true,
+		},
+	)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger,
+	})
 
 	return db, err
 }

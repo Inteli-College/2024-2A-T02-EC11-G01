@@ -2,25 +2,27 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
+	"github.com/google/uuid"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var mockLocationID *string
-var mockPredictionID *string
+var mockLocationID *uuid.UUID
+var mockPredictionID *uuid.UUID
 
 func TestCreatePredictionRepository(t *testing.T) {
 	ctx := context.Background()
 
 	// Create location first
 	location, err := createLocation(ctx)
-	if err != nil || location.LocationId == nil {
+	if err != nil || location.LocationId == uuid.Nil {
 		t.Fatalf("Failed to create location before creating predictions: %v", err)
 	}
-	mockLocationID = location.LocationId
+	mockLocationID = &location.LocationId
 
 	result, err := createPrediction(ctx)
 
@@ -34,7 +36,7 @@ func TestPredictionGetByID(t *testing.T) {
 	ctx := context.Background()
 	assert.NotNil(t, mockPredictionID, "Unable to start test: no prediction_id obtained")
 
-	prediction, err := predictionRepo.GetByID(ctx, mockPredictionID)
+	prediction, err := predictionRepo.FindPredictionById(ctx, mockPredictionID)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, prediction)
@@ -47,7 +49,7 @@ func TestPredictionGetByLocationID(t *testing.T) {
 
 	assert.NotNil(t, mockLocationID, "Unable to start test: no location_id obtained")
 
-	predictions, err := predictionRepo.GetAllByLocationID(ctx, mockLocationID, nil, nil)
+	predictions, err := predictionRepo.FindAllPredictionsByLocationID(ctx, mockLocationID, nil, nil)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, predictions)
@@ -77,7 +79,7 @@ func TestPredictionGetByLocationIDWithLimit(t *testing.T) {
 
 	assert.NotNil(t, mockLocationID, "Unable to start test: no location_id obtained")
 
-	predictions, err := predictionRepo.GetAllByLocationID(ctx, mockLocationID, &limit, &offset)
+	predictions, err := predictionRepo.FindAllPredictionsByLocationID(ctx, mockLocationID, &limit, &offset)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, predictions)
@@ -97,7 +99,7 @@ func TestPredictionGetByLocationIDWithLimit(t *testing.T) {
 
 func TestPredictionGetAll(t *testing.T) {
 	ctx := context.Background()
-	predictions, err := predictionRepo.GetAll(ctx, nil, nil)
+	predictions, err := predictionRepo.FindAllPredictions(ctx, nil, nil)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, predictions)
@@ -124,7 +126,7 @@ func TestPredictionGetAllWithLimit(t *testing.T) {
 		assert.Nil(t, prediction_err, "Unable to start test: unable to create predictions")
 	}
 
-	predictions, err := predictionRepo.GetAll(ctx, &limit, &offset)
+	predictions, err := predictionRepo.FindAllPredictions(ctx, &limit, &offset)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, predictions)
@@ -142,19 +144,24 @@ func TestPredictionGetAllWithLimit(t *testing.T) {
 
 }
 
-func createPrediction(ctx context.Context) (*dto.PredictionDTO, error) {
+func createPrediction(ctx context.Context) (*entity.Prediction, error) {
 	rawImagePath := "my/mock/path/raw-image"
 	outputImagePath := "my/mock/path/output-image"
 	output := map[string]interface{}{
 		"trees": "10",
 	}
 
-	input := dto.CreatePredictionInputDTO{
-		RawImagePath:    &rawImagePath,
-		OutputImagePath: &outputImagePath,
-		LocationId:      mockLocationID,
-		Output:          output,
+	jsonOutput, _ := json.Marshal(output)
+
+	prediction, err := entity.NewPrediction(
+		&rawImagePath,
+		&outputImagePath,
+		jsonOutput,
+		mockLocationID,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	return predictionRepo.Create(ctx, &input)
+	return predictionRepo.CreatePrediction(ctx, prediction)
 }
