@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -38,6 +38,16 @@ services:
       RABBITMQ_DEFAULT_PASS: password
     networks:
       - app-network
+
+  predictor:
+    build:
+      context: ./predictor
+      dockerfile: Dockerfile
+    container_name: predictor
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
 
 volumes:
   postgres_data:
