@@ -5,16 +5,15 @@ import io
 import cv2
 from PIL import Image
 import os
+from src.clients.rabbitmq import RabbitMQClient
+from src.settings.settings import settings
 import pickle
 import uuid
-
-from serverless.clients.rabbitmq import RabbitMQClient
-from serverless.settings.settings import settings
 
 app = FastAPI()
 
 model_file_path = "deepforest_model.pkl"
-images_root_dir = "./images"  # Prefixo ajustado
+images_root_dir = "./images"
 input_dir = f"{images_root_dir}/input"
 output_dir = f"{images_root_dir}/output"
 
@@ -32,6 +31,7 @@ else:
 os.makedirs(input_dir, exist_ok=True)
 os.makedirs(output_dir, exist_ok=True)
 
+
 def get_rabbitmq_client() -> RabbitMQClient:
     host = settings.rabbitmq_config.host
     queue = settings.rabbitmq_config.queue
@@ -39,6 +39,7 @@ def get_rabbitmq_client() -> RabbitMQClient:
     password = settings.rabbitmq_config.password
 
     return RabbitMQClient(host=host, queue=queue, username=username, password=password)
+
 
 @app.post("/predict/")
 async def predict_image(
