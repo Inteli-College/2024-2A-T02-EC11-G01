@@ -11,9 +11,9 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Manager API Support",
-            "url": "https://github.com/Inteli-College/2024-1B-T02-EC10-G04",
-            "email": "gomedicine@inteli.edu.br"
+            "name": "App API Support",
+            "url": "https://github.com/Inteli-College/2024-2A-T02-EC11-G01",
+            "email": "artemis@inteli.edu.br"
         },
         "license": {
             "name": "Apache 2.0",
@@ -461,6 +461,9 @@ const docTemplate = `{
                 "coordinate_y": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "location_id": {
                     "type": "string"
                 },
@@ -493,14 +496,6 @@ const docTemplate = `{
                 }
             }
         }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "\"Type: Bearer token\"",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
     }
 }`
 
@@ -510,7 +505,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Manager API",
+	Title:            "App API",
 	Description:      "This is a.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

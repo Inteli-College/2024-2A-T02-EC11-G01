@@ -12,8 +12,18 @@ type PredictionDTO struct {
 }
 
 type CreatePredictionInputDTO struct {
-	RawImagePath    *string                `json:"raw_image_path"`
-	OutputImagePath *string                `json:"output_image_path"`
+	RawImagePath    string                `json:"raw_image_path"`
+	OutputImagePath string                `json:"output_image_path"`
 	Output          map[string]interface{} `json:"output"`
-	LocationId      *string                `json:"location_id"`
+	LocationId      string                `json:"location_id"`
+}
+
+type FindAllPredictionsOutputDTO []*PredictionDTO
+
+type FindPredictionByIdInputDTO struct {
+	PredictionId string `json:"prediction_id"`
+}
+
+type FindPredictionByLocationIdInputDTO struct {
+	LocationId string `json:"location_id"`
 }

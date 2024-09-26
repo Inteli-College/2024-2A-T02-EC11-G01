@@ -27,6 +27,8 @@ definitions:
         type: string
       coordinate_y:
         type: string
+      created_at:
+        type: string
       location_id:
         type: string
       name:
@@ -51,15 +53,15 @@ definitions:
 host: localhost:8080
 info:
   contact:
-    email: gomedicine@inteli.edu.br
-    name: Manager API Support
-    url: https://github.com/Inteli-College/2024-1B-T02-EC10-G04
+    email: artemis@inteli.edu.br
+    name: App API Support
+    url: https://github.com/Inteli-College/2024-2A-T02-EC11-G01
   description: This is a.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Manager API
+  title: App API
   version: "1.0"
 paths:
   /locations:
@@ -322,10 +324,4 @@ paths:
       summary: Get predictions by location Id
       tags:
       - Predictions
-securityDefinitions:
-  BearerAuth:
-    description: '"Type: Bearer token"'
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

@@ -2,19 +2,31 @@ package configs
 
 import (
 	"log"
+	"os"
+	"sync"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func SetupRabbitMQ() *amqp.Channel {
-	conn, err := amqp.Dial("amqp://consumerUser:consumerPassword@rabbitmq:5672/")
+func setupRabbitMQChannel() (*amqp.Channel, error) {
+	rabbitMQChannel, isSet := os.LookupEnv("RABBITMQ_CHANNEL")
+	if !isSet {
+		log.Fatalf("RABBITMQ_CHANNEL is not set")
+	}
+
+	conn, err := amqp.Dial(rabbitMQChannel)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-		defer conn.Close()
+		panic(err)
 	}
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
-		defer ch.Close()
+		panic(err)
 	}
-	return ch
+	return ch, nil
+}
+
+var setupRabbitMQChannelOnce = sync.OnceValues(setupRabbitMQChannel)
+
+func SetupRabbitMQChannel() (*amqp.Channel, error) {
+	return setupRabbitMQChannelOnce()
 }

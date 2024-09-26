@@ -1,6 +1,18 @@
-version: '3.8'
-
 services:
+  app:
+    hostname: app
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: build/Dockerfile.app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   postgres:
     image: postgres:13
     container_name: postgres
@@ -12,36 +24,43 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
 
-  migrations:
-    build:
-      context: ./database
-      dockerfile: Dockerfile
-    container_name: migrations
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/db
-    depends_on:
-      - postgres
-    networks:
-      - app-network
+  # migrations:
+  #   build:
+  #     context: ./infra/database
+  #     dockerfile: Dockerfile
+  #   container_name: migrations
+  #   environment:
+  #     - DATABASE_URL=postgresql://user:password@postgres:5432/db
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
 
   rabbitmq:
-    image: rabbitmq:3-management
     container_name: rabbitmq
+    build: ./infraestructure/rabbitmq
     ports:
-      - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    networks:
-      - app-network
+      - "5672:5672"
+    expose:
+      - "5672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    restart: always
+
+  predictor:
+    build:
+      context: ./predictor
+      dockerfile: Dockerfile
+    container_name: predictor
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
 
 volumes:
   postgres_data:
-
-networks:
-  app-network:
-    driver: bridge
