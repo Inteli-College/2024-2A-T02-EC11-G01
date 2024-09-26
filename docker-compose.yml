@@ -33,15 +33,13 @@ services:
 
   migrations:
     build:
-      context: ./infra/database
+      context: ./infraestructure/database
       dockerfile: Dockerfile
     container_name: migrations
     environment:
       DATABASE_URL: postgresql://user:password@postgres:5432/db
     depends_on:
       - postgres
-    networks:
-      - app-network
 
   rabbitmq:
     container_name: rabbitmq
