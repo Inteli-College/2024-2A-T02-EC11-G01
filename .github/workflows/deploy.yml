@@ -1,10 +1,9 @@
-name: Deploy docker to AWS
+name: Deploy to AWS
 
 on:
   push:
     branches:
       - main
-      - feat/deploy
 
 jobs:
   deploy:
@@ -19,7 +18,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_PEM }}
 
-      - name: Deploy to EC2
+      - name: Run docker-compose inside EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ubuntu
