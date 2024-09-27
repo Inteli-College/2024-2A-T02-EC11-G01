@@ -23,9 +23,15 @@ def render_dashboard():
             'Dias': ['1', '2', '3', '4', '5', '6'],
             'Árvores': [10, 15, 20, 18, 12, 14]
         })
-        fig_bar = px.bar(bar_data, x='Dias', y='Árvores', title="Árvores encontradas por dia",
+        fig_bar = px.bar(bar_data, x='Dias', y='Árvores',
+                         title="Árvores encontradas por dia",
                          color_discrete_sequence=['#4CAF50'])
-        fig_bar.update_layout(margin=dict(l=0, r=0, t=100, b=100))
+        # Atualizando a fonte do título e da legenda
+        fig_bar.update_layout(
+            title=dict(text="Árvores encontradas por dia", font=dict(family="Poppins, sans-serif", size=20)),
+            margin=dict(l=0, r=0, t=100, b=100),
+            font=dict(family="Poppins, sans-serif")  # Adicionando a fonte para o restante do gráfico
+        )
         st.plotly_chart(fig_bar, use_container_width=True)
 
     with col2:
@@ -42,11 +48,17 @@ def render_dashboard():
     with col4:
         linha_data = pd.DataFrame({
             'Dias': ['1', '2', '3', '4', '5', '6', '7'],
-            'Carbono': [1, 2, 3, 4, 5, 6, 7]
+            'Carbono': [2, 3, 1, 5, 2, 7, 6]
         })
-        fig_line = px.line(linha_data, x='Dias', y='Carbono', title="Histórico de Carbono Capturado",
+        fig_line = px.line(linha_data, x='Dias', y='Carbono',
+                           title="Histórico de Carbono Capturado",
                            line_shape='linear', color_discrete_sequence=['#388E3C'])
-        fig_line.update_layout(margin=dict(l=0, r=0, t=100, b=100))
+        # Atualizando a fonte do título e da legenda
+        fig_line.update_layout(
+            title=dict(text="Histórico de Carbono Capturado", font=dict(family="Poppins, sans-serif", size=20)),
+            margin=dict(l=0, r=0, t=100, b=100),
+            font=dict(family="Poppins, sans-serif")  # Adicionando a fonte para o restante do gráfico
+        )
         st.plotly_chart(fig_line, use_container_width=True)
 
     st.markdown("<h4 style='color: #4CAF50;'>Por área monitorada</h4>", unsafe_allow_html=True)

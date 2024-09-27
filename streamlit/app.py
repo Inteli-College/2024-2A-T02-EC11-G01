@@ -68,7 +68,7 @@ with st.sidebar:
     st.write("Detalhamento")
 
 st.markdown("<h1 class='header'>Dashboard</h1>", unsafe_allow_html=True)
-st.markdown("<h6 style='color: #black;'>Visão geral - Métricas</h6>", unsafe_allow_html=True)
+st.markdown("<h6 style='color: #black;'>Visão geral - Métricas</>", unsafe_allow_html=True)
 
 col1, col2 = st.columns([3, 2], gap="large")  
 
