@@ -26,17 +26,16 @@ def render_dashboard():
         fig_bar = px.bar(bar_data, x='Dias', y='Árvores',
                          title="Árvores encontradas por dia",
                          color_discrete_sequence=['#4CAF50'])
-        # Atualizando a fonte do título e da legenda
         fig_bar.update_layout(
             title=dict(text="Árvores encontradas por dia", font=dict(family="Poppins, sans-serif", size=20)),
             margin=dict(l=0, r=0, t=100, b=100),
-            font=dict(family="Poppins, sans-serif")  # Adicionando a fonte para o restante do gráfico
+            font=dict(family="Poppins, sans-serif")  
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 
     with col2:
         st.markdown("<h4 style='color: #4CAF50;'>Últimas imagens</h4>", unsafe_allow_html=True)
-        st.image("abundance.png", caption="Imagem retornada pelo modelo de deep forest", use_column_width=True)
+        st.image("imagem-modelo-deep-forest.jpeg", caption="Imagem retornada pelo modelo de deep forest", use_column_width=True)
 
     st.markdown("<h4 style='color: #4CAF50;'>Quantidade de Carbono Capturado</h4>", unsafe_allow_html=True)
     
@@ -75,6 +74,9 @@ def render_dashboard():
             """, 
             unsafe_allow_html=True
         )
+
+        st.image("imagem-modelo-deep-forest.jpeg", use_column_width=True)
+        
     with col6:
         st.markdown(
             """
@@ -85,6 +87,8 @@ def render_dashboard():
             """, 
             unsafe_allow_html=True
         )
+        st.image("imagem-modelo-deep-forest.jpeg", use_column_width=True)
+
 
 if __name__ == "__main__":
     render_dashboard()
