@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+import requests
 
 def render_dashboard():
     col1, col2 = st.columns([3, 2], gap="large")
