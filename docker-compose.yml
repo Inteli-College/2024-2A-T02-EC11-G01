@@ -4,8 +4,14 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    env_file:
-      - ./backend/.env
+    environment:
+      POSTGRES_URL: postgresql://user:password@localhost:5432/db"
+      DATABASE_HOST: localhost
+      DATABASE_NAME: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password
+      RABBITMQ_CHANNEL: amqp://user:user@localhost:5672/
     build:
       context: ./backend
       dockerfile: build/Dockerfile.app
@@ -25,17 +31,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # migrations:
-  #   build:
-  #     context: ./infra/database
-  #     dockerfile: Dockerfile
-  #   container_name: migrations
-  #   environment:
-  #     - DATABASE_URL=postgresql://user:password@postgres:5432/db
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - app-network
+  migrations:
+    build:
+      context: ./infraestructure/database
+      dockerfile: Dockerfile
+    container_name: migrations
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/db
+    depends_on:
+      - postgres
 
   rabbitmq:
     container_name: rabbitmq
