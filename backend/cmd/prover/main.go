@@ -13,10 +13,14 @@ import "C"
 import (
 	"log"
 	"os"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/rollups_contracts"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/rollups_contracts"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/penglongli/gin-metrics/ginmetrics"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -56,6 +60,27 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	/////////////////////// Webserver /////////////////////////
+	router := gin.Default()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true, // TODO: change to false and make it for production
+		AllowMethods:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+	}))
+
+	m := ginmetrics.GetMonitor()
+	m.SetMetricPath("/api/v1/metrics")
+	m.Use(router)
+
+	router.GET("/api/v1/healthz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	})
 
 	/////////////////////// Predictions Consumer /////////////////////////
 	msgChan := make(chan amqp.Delivery)
