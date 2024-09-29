@@ -30,7 +30,7 @@ func (h *LocationCreatedHandler) Handle(event events.EventInterface, wg *sync.Wa
 	}
 
 	h.RabbitMQChannel.Publish(
-		"amq.direct",       // exchange
+		"",                 // exchange
 		"location.created", // key name
 		false,              // mandatory
 		false,              // immediate

@@ -14,29 +14,30 @@ var (
 )
 
 type LocationRepository interface {
-	CreateLocation(ctx context.Context, input *Location) (*Location, error)
-	GetAllLocations(ctx context.Context) ([]*Location, error)
-	GetLocationById(ctx context.Context, locationId *uuid.UUID) (*Location, error)
-	UpdateLocation(ctx context.Context, input *Location) (*Location, error)
-	DeleteLocation(ctx context.Context, locationId *uuid.UUID) error
+	CreateLocation(ctx context.Context, location *Location) (*Location, error)
+	FindAllLocations(ctx context.Context) ([]*Location, error)
+	FindLocationById(ctx context.Context, id uuid.UUID) (*Location, error)
+	UpdateLocation(ctx context.Context, location *Location) (*Location, error)
+	DeleteLocation(ctx context.Context, id uuid.UUID) error
 }
 
 type Location struct {
-	LocationId  uuid.UUID `json:"location_id,omitempty" gorm:"type:uuid;default:uuid_generate_v4()"`
-	Name        string    `json:"name"`
-	CoordinateX string    `json:"coordinate_x"`
-	CoordinateY string    `json:"coordinate_y"`
-	CreatedAt   time.Time `json:"created_at,omitempty" gorm:"type:timestamp"`
-	UpdatedAt   time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
+	Id          uuid.UUID     `json:"id,omitempty" gorm:"primarykey;type:uuid"`
+	Name        string        `json:"name" gorm:"type:text"`
+	Latitude    string        `json:"latitude" gorm:"type:text"`
+	Longitude   string        `json:"longitude" gorm:"type:text"`
+	Predictions []*Prediction `json:"predictions,omitempty" gorm:"foreignKey:LocationId;constraint:OnDelete:CASCADE"`
+	CreatedAt   time.Time     `json:"created_at,omitempty" gorm:"type:timestamp"`
+	UpdatedAt   time.Time     `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
 
-func NewLocation(name *string, latitude *string, longitude *string) (*Location, error) {
+func NewLocation(name string, latitude string, longitude string) (*Location, error) {
 	location := &Location{
-		LocationId:  uuid.New(),
-		Name:        *name,
-		CoordinateX: *latitude,
-		CoordinateY: *longitude,
-		CreatedAt:   time.Now(),
+		Id:        uuid.New(),
+		Name:      name,
+		Latitude:  latitude,
+		Longitude: longitude,
+		CreatedAt: time.Now(),
 	}
 	if err := location.Validate(); err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func NewLocation(name *string, latitude *string, longitude *string) (*Location, 
 }
 
 func (l *Location) Validate() error {
-	if l.LocationId == uuid.Nil || l.Name == "" || l.CoordinateX == "" || l.CoordinateY == "" || l.CreatedAt.IsZero() {
+	if l.Id == uuid.Nil || l.Name == "" || l.Latitude == "" || l.Longitude == "" || l.CreatedAt.IsZero() {
 		return ErrInvalidLocation
 	}
 	return nil

@@ -11,16 +11,10 @@ type EventDispatcher struct {
 	handlers map[string][]EventHandlerInterface
 }
 
-func newEventDispatcher() *EventDispatcher {
+func NewEventDispatcher() *EventDispatcher {
 	return &EventDispatcher{
 		handlers: make(map[string][]EventHandlerInterface),
 	}
-}
-
-var newEventDispatcherOnce = sync.OnceValue(newEventDispatcher)
-
-func NewEventDispatcher() *EventDispatcher {
-	return newEventDispatcher()
 }
 
 func (ev *EventDispatcher) Dispatch(event EventInterface) error {

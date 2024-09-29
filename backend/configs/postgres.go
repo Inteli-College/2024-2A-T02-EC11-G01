@@ -4,23 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func setupPostgres() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
-		os.Getenv("DATABASE_HOST"),
-		os.Getenv("DATABASE_USER"),
-		os.Getenv("DATABASE_PASSWORD"),
-		os.Getenv("DATABASE_NAME"),
-		os.Getenv("DATABASE_PORT"),
-	)
-
+func SetupPostgres(postgresUrl string) (*gorm.DB, error) {
 	logger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -30,15 +22,25 @@ func setupPostgres() (*gorm.DB, error) {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(postgresUrl), &gorm.Config{
 		Logger: logger,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %v", err)
+	}
 
+	err = db.AutoMigrate(
+		&entity.Location{},
+		&entity.Prediction{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to run migrations: %v", err)
+	}
 	return db, err
 }
 
-var setupPostgresOnce = sync.OnceValues(setupPostgres)
+// var setupPostgresOnce = sync.OnceValues(setupPostgres)
 
-func SetupPostgres() (*gorm.DB, error) {
-	return setupPostgresOnce()
-}
+// func SetupPostgres() (*gorm.DB, error) {
+// 	return setupPostgresOnce()
+// }

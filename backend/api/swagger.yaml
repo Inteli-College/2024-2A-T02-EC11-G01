@@ -1,0 +1,396 @@
+basePath: /api/v1
+definitions:
+  location_usecase.CreateLocationInputDTO:
+    properties:
+      latitude:
+        type: string
+      longitude:
+        type: string
+      name:
+        type: string
+    type: object
+  location_usecase.CreateLocationOutputDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: string
+      longitude:
+        type: string
+      name:
+        type: string
+    type: object
+  location_usecase.FindLocationOutputDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: string
+      longitude:
+        type: string
+      name:
+        type: string
+      predictions:
+        items:
+          $ref: '#/definitions/prediction_usecase.FindPredictionOutputDTO'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  location_usecase.UpdateLocationInputDTO:
+    properties:
+      id:
+        type: string
+      latitude:
+        type: string
+      longitude:
+        type: string
+      name:
+        type: string
+    type: object
+  location_usecase.UpdateLocationOutputDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: string
+      longitude:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  prediction_usecase.CreatePredictionInputDTO:
+    properties:
+      annotated_image:
+        type: string
+      detections:
+        type: integer
+      location_id:
+        type: string
+      raw_image:
+        type: string
+    type: object
+  prediction_usecase.CreatePredictionOutputDTO:
+    properties:
+      annotated_image:
+        type: string
+      created_at:
+        type: string
+      detections:
+        type: integer
+      id:
+        type: string
+      location_id:
+        type: string
+      raw_image:
+        type: string
+    type: object
+  prediction_usecase.FindPredictionOutputDTO:
+    properties:
+      annotated_image:
+        type: string
+      created_at:
+        type: string
+      detections:
+        type: integer
+      id:
+        type: string
+      location_id:
+        type: string
+      raw_image:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  prediction_usecase.UpdatePredictionInputDTO:
+    properties:
+      annotated_image:
+        type: string
+      detections:
+        type: integer
+      id:
+        type: string
+      location_id:
+        type: string
+      raw_image:
+        type: string
+    type: object
+  prediction_usecase.UpdatePredictionOutputDTO:
+    properties:
+      annotated_image:
+        type: string
+      created_at:
+        type: string
+      detections:
+        type: integer
+      id:
+        type: string
+      location_id:
+        type: string
+      raw_image:
+        type: string
+      update_at:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: artemis@inteli.edu.br
+    name: App API Support
+    url: https://github.com/Inteli-College/2024-2A-T02-EC11-G01
+  description: This is a.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: App API
+  version: "1.0"
+paths:
+  /locations:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all Locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/location_usecase.FindLocationOutputDTO'
+              type: array
+            type: array
+      summary: Retrieve all Locations
+      tags:
+      - Locations
+    post:
+      consumes:
+      - application/json
+      description: Create a new Location in the system
+      parameters:
+      - description: Location entity to create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/location_usecase.CreateLocationInputDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/location_usecase.CreateLocationOutputDTO'
+      summary: Create a new Location
+      tags:
+      - Locations
+  /locations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a specific Location from the system
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Location deleted successfully
+          schema:
+            type: string
+      summary: Delete a Location
+      tags:
+      - Locations
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific Location by its ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/location_usecase.FindLocationOutputDTO'
+      summary: Retrieve a Location by ID
+      tags:
+      - Locations
+    put:
+      consumes:
+      - application/json
+      description: Update a specific Location entity
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Location entity to update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/location_usecase.UpdateLocationInputDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/location_usecase.UpdateLocationOutputDTO'
+      summary: Update a Location
+      tags:
+      - Locations
+  /predictions:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all Predictions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/prediction_usecase.FindPredictionOutputDTO'
+              type: array
+            type: array
+      summary: Retrieve all Predictions
+      tags:
+      - Predictions
+    post:
+      consumes:
+      - application/json
+      description: Create a new Prediction in the system
+      parameters:
+      - description: Prediction entity to create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/prediction_usecase.CreatePredictionInputDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/prediction_usecase.CreatePredictionOutputDTO'
+      summary: Create a new Prediction
+      tags:
+      - Predictions
+  /predictions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a specific Prediction from the system
+      parameters:
+      - description: Prediction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Prediction deleted successfully
+          schema:
+            type: string
+      summary: Delete a Prediction
+      tags:
+      - Predictions
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific Prediction by its ID
+      parameters:
+      - description: Prediction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/prediction_usecase.FindPredictionOutputDTO'
+      summary: Retrieve a Prediction by ID
+      tags:
+      - Predictions
+    put:
+      consumes:
+      - application/json
+      description: Update a specific Prediction entity
+      parameters:
+      - description: Prediction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Prediction entity to update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/prediction_usecase.UpdatePredictionInputDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/prediction_usecase.UpdatePredictionOutputDTO'
+      summary: Update a Prediction
+      tags:
+      - Predictions
+  /predictions/location/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all Predictions by Location ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/prediction_usecase.FindPredictionOutputDTO'
+              type: array
+            type: array
+      summary: Retrieve all Predictions by Location ID
+      tags:
+      - Predictions
+swagger: "2.0"

@@ -4,23 +4,15 @@
 package main
 
 import (
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event/handler"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	web_handler "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/web/handler"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/google/wire"
+	"gorm.io/gorm"
 )
-
-var setDBprovider = wire.NewSet(configs.SetupPostgres)
-
-var setRabbitProvider = wire.NewSet(configs.SetupRabbitMQChannel)
-
-var setEventDispatcher = wire.NewSet(events.NewEventDispatcher, wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
 
 var setEventDispatcherDependency = wire.NewSet(
 	events.NewEventDispatcher,
@@ -32,23 +24,21 @@ var setEventDispatcherDependency = wire.NewSet(
 )
 
 var setLocationRepositoryDependency = wire.NewSet(
-	setDBprovider,
 	repository.NewLocationRepositoryGorm,
 	wire.Bind(new(entity.LocationRepository), new(*repository.LocationRepositoryGorm)),
 )
 
 var setPredictionRepositoryDependency = wire.NewSet(
-	setDBprovider,
 	repository.NewPredictionRepositoryGorm,
 	wire.Bind(new(entity.PredictionRepository), new(*repository.PredictionRepositoryGorm)),
 )
 
 var setLocationWebHandlers = wire.NewSet(
-	web_handler.NewLocationHandler,
+	web_handler.NewLocationHandlers,
 )
 
 var setPredictionWebHandlers = wire.NewSet(
-	web_handler.NewPredictionHandler,
+	web_handler.NewPredictionHandlers,
 )
 
 var setLocationCreatedEvent = wire.NewSet(
@@ -61,56 +51,29 @@ var setPredictionCreatedEvent = wire.NewSet(
 	wire.Bind(new(events.EventInterface), new(*event.PredictionCreated)),
 )
 
-func NewEventDispatcher() (*events.EventDispatcher, error) {
-	wire.Build(setEventDispatcher)
-
-	return nil, nil
-}
-
-func NewLocationCreatedHandler() (*handler.LocationCreatedHandler, error) {
-	wire.Build(setRabbitProvider, handler.NewLocationCreatedHandler)
-
-	return nil, nil
-}
-
-func NewPredictionCreatedHandler() (*handler.PredictionCreatedHandler, error) {
-	wire.Build(setRabbitProvider, handler.NewPredictionCreatedHandler)
-
-	return nil, nil
-}
-
-func NewRabbitMQConsumer() (*rabbitmq.RabbitMQConsumer, error) {
-	wire.Build(setRabbitProvider, rabbitmq.NewRabbitMQConsumer)
-
-	return nil, nil
-}
-
-func NewCreatePredictionUseCase() (*prediction_usecase.CreatePredictionUseCase, error) {
+func NewCreatePredictionUseCase(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) *prediction_usecase.CreatePredictionUseCase {
 	wire.Build(
 		setPredictionRepositoryDependency,
 		setPredictionCreatedEvent,
-		setEventDispatcher,
 		prediction_usecase.NewCreatePredictionUseCase,
 	)
-	return &prediction_usecase.CreatePredictionUseCase{}, nil
+	return &prediction_usecase.CreatePredictionUseCase{}
 }
 
-func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
+func NewPredicitonWebHandlers(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) (*PredictionWebHandlers, error) {
 	wire.Build(
 		setPredictionRepositoryDependency,
 		setPredictionCreatedEvent,
-		setEventDispatcher,
 		setPredictionWebHandlers,
 		wire.Struct(new(PredictionWebHandlers), "*"),
 	)
 	return nil, nil
 }
 
-func NewLocationWebHandlers() (*LocationWebHandlers, error) {
+func NewLocationWebHandlers(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) (*LocationWebHandlers, error) {
 	wire.Build(
 		setLocationRepositoryDependency,
 		setLocationCreatedEvent,
-		setEventDispatcher,
 		setLocationWebHandlers,
 		wire.Struct(new(LocationWebHandlers), "*"),
 	)
@@ -118,9 +81,9 @@ func NewLocationWebHandlers() (*LocationWebHandlers, error) {
 }
 
 type LocationWebHandlers struct {
-	LocationWebHandlers *web_handler.LocationHandler
+	LocationWebHandlers *web_handler.LocationHandlers
 }
 
 type PredictionWebHandlers struct {
-	PredictionWebHandlers *web_handler.PredictionHandler
+	PredictionWebHandlers *web_handler.PredictionHandlers
 }

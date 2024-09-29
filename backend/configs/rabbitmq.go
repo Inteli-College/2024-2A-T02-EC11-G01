@@ -1,19 +1,8 @@
 package configs
 
-import (
-	"log"
-	"os"
-	"sync"
+import amqp "github.com/rabbitmq/amqp091-go"
 
-	amqp "github.com/rabbitmq/amqp091-go"
-)
-
-func setupRabbitMQChannel() (*amqp.Channel, error) {
-	rabbitMQChannel, isSet := os.LookupEnv("RABBITMQ_CHANNEL")
-	if !isSet {
-		log.Fatalf("RABBITMQ_CHANNEL is not set")
-	}
-
+func SetupRabbitMQChannel(rabbitMQChannel string) (*amqp.Channel, error) {
 	conn, err := amqp.Dial(rabbitMQChannel)
 	if err != nil {
 		panic(err)
@@ -23,10 +12,4 @@ func setupRabbitMQChannel() (*amqp.Channel, error) {
 		panic(err)
 	}
 	return ch, nil
-}
-
-var setupRabbitMQChannelOnce = sync.OnceValues(setupRabbitMQChannel)
-
-func SetupRabbitMQChannel() (*amqp.Channel, error) {
-	return setupRabbitMQChannelOnce()
 }

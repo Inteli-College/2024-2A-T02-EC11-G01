@@ -36,7 +36,14 @@
   ],
   "queues": [
     {
-      "name": "predictions",
+      "name": "prediction",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {},
+      "vhost": "/"
+    },
+    {
+      "name": "prediction.created",
       "durable": true,
       "auto_delete": false,
       "arguments": {},
