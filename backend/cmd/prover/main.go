@@ -13,7 +13,6 @@ import "C"
 import (
 	"log"
 	"os"
-
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/rollups_contracts"
