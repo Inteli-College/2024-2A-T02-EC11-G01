@@ -25,15 +25,15 @@ install-asdf:
   @echo "Please see the configs in the official website: https://asdf-vm.com/guide/getting-started.html"
 
 install-deps:
-  @if !command -v asdf >/dev/null 2>&1; then \
+  @if ! command -v asdf >/dev/null 2>&1; then \
     just install-asdf ; \
   fi
 
-  @if !command -v rust >/dev/null 2>&1; then \
+  @if ! command -v rust >/dev/null 2>&1; then \
     . "$HOME/.asdf/asdf.sh" && asdf plugin add rust && asdf install rust 1.81.0 && asdf global rust 1.81.0 ;  \
   fi
 
-  @if !command -v node >/dev/null 2>&1; then \
+  @if ! command -v node >/dev/null 2>&1; then \
     . "$HOME/.asdf/asdf.sh" && asdf plugin add nodejs && asdf install node 20.17.0 && asdf global node 20.17.0 ;  \
   fi
 
