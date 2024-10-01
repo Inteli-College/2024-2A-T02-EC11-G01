@@ -4,15 +4,24 @@
 package main
 
 import (
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/event/handler"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
 	web_handler "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/web/handler"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/google/wire"
-	"gorm.io/gorm"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+var setDBprovider = wire.NewSet(configs.SetupPostgres)
+
+var setRabbitProvider = wire.NewSet(configs.SetupRabbitMQChannel)
+
+var setEventDispatcher = wire.NewSet(events.NewEventDispatcher, wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
 
 var setEventDispatcherDependency = wire.NewSet(
 	events.NewEventDispatcher,
@@ -24,11 +33,13 @@ var setEventDispatcherDependency = wire.NewSet(
 )
 
 var setLocationRepositoryDependency = wire.NewSet(
+	setDBprovider,
 	repository.NewLocationRepositoryGorm,
 	wire.Bind(new(entity.LocationRepository), new(*repository.LocationRepositoryGorm)),
 )
 
 var setPredictionRepositoryDependency = wire.NewSet(
+	setDBprovider,
 	repository.NewPredictionRepositoryGorm,
 	wire.Bind(new(entity.PredictionRepository), new(*repository.PredictionRepositoryGorm)),
 )
@@ -51,29 +62,62 @@ var setPredictionCreatedEvent = wire.NewSet(
 	wire.Bind(new(events.EventInterface), new(*event.PredictionCreated)),
 )
 
-func NewCreatePredictionUseCase(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) *prediction_usecase.CreatePredictionUseCase {
-	wire.Build(
-		setPredictionRepositoryDependency,
-		setPredictionCreatedEvent,
-		prediction_usecase.NewCreatePredictionUseCase,
-	)
-	return &prediction_usecase.CreatePredictionUseCase{}
+func NewRabbitChannel() (*amqp.Channel, error) {
+	wire.Build(setRabbitProvider)
+
+	return nil, nil
 }
 
-func NewPredicitonWebHandlers(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) (*PredictionWebHandlers, error) {
+func NewEventDispatcher() (*events.EventDispatcher, error) {
+	wire.Build(setEventDispatcher)
+
+	return nil, nil
+}
+
+func NewLocationCreatedHandler() (*handler.LocationCreatedHandler, error) {
+	wire.Build(setRabbitProvider, handler.NewLocationCreatedHandler)
+
+	return nil, nil
+}
+
+func NewPredictionCreatedHandler() (*handler.PredictionCreatedHandler, error) {
+	wire.Build(setRabbitProvider, handler.NewPredictionCreatedHandler)
+
+	return nil, nil
+}
+
+func NewRabbitMQConsumer() (*rabbitmq.RabbitMQConsumer, error) {
+	wire.Build(setRabbitProvider, rabbitmq.NewRabbitMQConsumer)
+
+	return nil, nil
+}
+
+func NewCreatePredictionUseCase() (*prediction_usecase.CreatePredictionUseCase, error) {
 	wire.Build(
 		setPredictionRepositoryDependency,
 		setPredictionCreatedEvent,
+		setEventDispatcher,
+		prediction_usecase.NewCreatePredictionUseCase,
+	)
+	return &prediction_usecase.CreatePredictionUseCase{}, nil
+}
+
+func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
+	wire.Build(
+		setPredictionRepositoryDependency,
+		setPredictionCreatedEvent,
+		setEventDispatcher,
 		setPredictionWebHandlers,
 		wire.Struct(new(PredictionWebHandlers), "*"),
 	)
 	return nil, nil
 }
 
-func NewLocationWebHandlers(db *gorm.DB, eventDispatcher events.EventDispatcherInterface) (*LocationWebHandlers, error) {
+func NewLocationWebHandlers() (*LocationWebHandlers, error) {
 	wire.Build(
 		setLocationRepositoryDependency,
 		setLocationCreatedEvent,
+		setEventDispatcher,
 		setLocationWebHandlers,
 		wire.Struct(new(LocationWebHandlers), "*"),
 	)
@@ -87,3 +131,4 @@ type LocationWebHandlers struct {
 type PredictionWebHandlers struct {
 	PredictionWebHandlers *web_handler.PredictionHandlers
 }
+

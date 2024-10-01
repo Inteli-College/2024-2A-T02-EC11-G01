@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func SetupPostgres(postgresUrl string) (*gorm.DB, error) {
+func setupPostgres() (*gorm.DB, error) {
+	postgresUrl, isSet := os.LookupEnv("POSTGRES_URL")
+	if !isSet {
+		log.Fatalf("POSTGRES_URL is not set")
+	}
+
 	logger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -29,18 +34,11 @@ func SetupPostgres(postgresUrl string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
 
-	err = db.AutoMigrate(
-		&entity.Location{},
-		&entity.Prediction{},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to run migrations: %v", err)
-	}
 	return db, err
 }
 
-// var setupPostgresOnce = sync.OnceValues(setupPostgres)
+var setupPostgresOnce = sync.OnceValues(setupPostgres)
 
-// func SetupPostgres() (*gorm.DB, error) {
-// 	return setupPostgresOnce()
-// }
+func SetupPostgres() (*gorm.DB, error) {
+	return setupPostgresOnce()
+}
