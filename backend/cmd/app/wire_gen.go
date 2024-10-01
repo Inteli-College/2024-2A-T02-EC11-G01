@@ -17,9 +17,18 @@ import (
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/google/wire"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 // Injectors from wire.go:
+
+func NewRabbitChannel() (*amqp091.Channel, error) {
+	channel, err := configs.SetupRabbitMQChannel()
+	if err != nil {
+		return nil, err
+	}
+	return channel, nil
+}
 
 func NewEventDispatcher() (*events.EventDispatcher, error) {
 	eventDispatcher := events.NewEventDispatcher()
@@ -66,31 +75,31 @@ func NewCreatePredictionUseCase() (*prediction_usecase.CreatePredictionUseCase, 
 }
 
 func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
+	eventDispatcher := events.NewEventDispatcher()
 	db, err := configs.SetupPostgres()
 	if err != nil {
 		return nil, err
 	}
 	predictionRepositoryGorm := repository.NewPredictionRepositoryGorm(db)
-	eventDispatcher := events.NewEventDispatcher()
 	predictionCreated := event.NewPredictionCreated()
-	predictionHandler := handler2.NewPredictionHandler(predictionRepositoryGorm, eventDispatcher, predictionCreated)
+	predictionHandlers := handler2.NewPredictionHandlers(eventDispatcher, predictionRepositoryGorm, predictionCreated)
 	predictionWebHandlers := &PredictionWebHandlers{
-		PredictionWebHandlers: predictionHandler,
+		PredictionWebHandlers: predictionHandlers,
 	}
 	return predictionWebHandlers, nil
 }
 
 func NewLocationWebHandlers() (*LocationWebHandlers, error) {
+	eventDispatcher := events.NewEventDispatcher()
 	db, err := configs.SetupPostgres()
 	if err != nil {
 		return nil, err
 	}
 	locationRepositoryGorm := repository.NewLocationRepositoryGorm(db)
-	eventDispatcher := events.NewEventDispatcher()
 	locationCreated := event.NewLocationCreated()
-	locationHandler := handler2.NewLocationHandler(locationRepositoryGorm, eventDispatcher, locationRepositoryGorm, locationCreated)
+	locationHandlers := handler2.NewLocationHandlers(eventDispatcher, locationRepositoryGorm, locationCreated)
 	locationWebHandlers := &LocationWebHandlers{
-		LocationWebHandlers: locationHandler,
+		LocationWebHandlers: locationHandlers,
 	}
 	return locationWebHandlers, nil
 }
@@ -113,18 +122,18 @@ var setPredictionRepositoryDependency = wire.NewSet(
 	setDBprovider, repository.NewPredictionRepositoryGorm, wire.Bind(new(entity.PredictionRepository), new(*repository.PredictionRepositoryGorm)),
 )
 
-var setLocationWebHandlers = wire.NewSet(handler2.NewLocationHandler)
+var setLocationWebHandlers = wire.NewSet(handler2.NewLocationHandlers)
 
-var setPredictionWebHandlers = wire.NewSet(handler2.NewPredictionHandler)
+var setPredictionWebHandlers = wire.NewSet(handler2.NewPredictionHandlers)
 
 var setLocationCreatedEvent = wire.NewSet(event.NewLocationCreated, wire.Bind(new(events.EventInterface), new(*event.LocationCreated)))
 
 var setPredictionCreatedEvent = wire.NewSet(event.NewPredictionCreated, wire.Bind(new(events.EventInterface), new(*event.PredictionCreated)))
 
 type LocationWebHandlers struct {
-	LocationWebHandlers *handler2.LocationHandler
+	LocationWebHandlers *handler2.LocationHandlers
 }
 
 type PredictionWebHandlers struct {
-	PredictionWebHandlers *handler2.PredictionHandler
+	PredictionWebHandlers *handler2.PredictionHandlers
 }

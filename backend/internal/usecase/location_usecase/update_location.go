@@ -2,10 +2,9 @@ package location_usecase
 
 import (
 	"context"
+	"time"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
-	"github.com/google/uuid"
 )
 
 type UpdateLocationUseCase struct {
@@ -18,38 +17,23 @@ func NewUpdateLocationUseCase(locationRepository entity.LocationRepository) *Upd
 	}
 }
 
-func (u *UpdateLocationUseCase) Execute(ctx context.Context, input *dto.UpdateLocationInputDTO) (*dto.LocationOutputDTO, error) {
-	locationUUID, errUUID := uuid.Parse(input.LocationId)
-	if errUUID != nil {
-		return nil, errUUID
-	}
-
-	location, errGet := u.LocationRepository.GetLocationById(ctx, &locationUUID)
-	if errGet != nil {
-		return nil, errGet
-	}
-
-	if input.Name != "" {
-		location.Name = input.Name
-	}
-
-	if input.CoordinateX != "" {
-		location.CoordinateX = input.CoordinateX
-	}
-
-	if input.CoordinateY != "" {
-		location.CoordinateY = input.CoordinateY
-	}
-
-	location, err := u.LocationRepository.UpdateLocation(ctx, location)
+func (u *UpdateLocationUseCase) Execute(ctx context.Context, input UpdateLocationInputDTO) (*UpdateLocationOutputDTO, error) {
+	location, err := u.LocationRepository.UpdateLocation(ctx, &entity.Location{
+		Id:        input.Id,
+		Name:      input.Name,
+		Latitude:  input.Latitude,
+		Longitude: input.Longitude,
+		UpdatedAt: time.Now(),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return &dto.LocationOutputDTO{
-		LocationId:  location.LocationId.String(),
-		Name:        location.Name,
-		CoordinateX: location.CoordinateX,
-		CoordinateY: location.CoordinateY,
-		CreatedAt:   location.CreatedAt,
+	return &UpdateLocationOutputDTO{
+		Id:        location.Id,
+		Name:      location.Name,
+		Latitude:  location.Latitude,
+		Longitude: location.Longitude,
+		CreatedAt: location.CreatedAt,
+		UpdatedAt: location.UpdatedAt,
 	}, nil
 }

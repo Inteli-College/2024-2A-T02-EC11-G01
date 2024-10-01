@@ -29,7 +29,7 @@ COPY requirements.txt .
 RUN pip install uv
 
 # Install Python dependencies
-RUN uv pip install --system --no-cache-dir -r requirements.txt
+RUN uv pip install --system --no-cache-dir --no-deps -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 
 # Copy the app files
 COPY . .

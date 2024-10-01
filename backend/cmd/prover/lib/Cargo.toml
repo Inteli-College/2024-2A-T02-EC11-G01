@@ -1,0 +1,24 @@
+[package]
+name = "prover"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# suas dependências aqui
+http-body-util = "0.1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+hyper = { version = "1.1", features = ["client", "http1", "server"] }
+hyper-util = { version = "0.1", features = ["full"] }
+tlsn-core = { git="https://github.com/tlsnotary/tlsn", tag = "v0.1.0-alpha.6", package = "tlsn-core" }
+tlsn-prover = { git="https://github.com/tlsnotary/tlsn", tag = "v0.1.0-alpha.6", package = "tlsn-prover" }
+tlsn-examples = { git="https://github.com/tlsnotary/tlsn", tag = "v0.1.0-alpha.6", package = "tlsn-examples" }
+p256 = "0.13"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "net", "io-std", "fs"] }
+tokio-util = "0.7"
+serde = { version = "1.0.147", features = ["derive"] }
+serde_json = "1.0"
+
+[lib]
+name = "prover"
+crate-type = ["staticlib"]

@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
-	ourSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/swagger"
+	appSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/penglongli/gin-metrics/ginmetrics"
 	amqp "github.com/rabbitmq/amqp091-go"
 	swaggerFiles "github.com/swaggo/files"
@@ -29,21 +29,35 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host	localhost:8080
+// @host	localhost:8081
 // @BasePath	/api/v1
 func main() {
-	godotenv.Load()
 	/////////////////////// Event Dispatcher /////////////////////////
-	eventDispatcher, _ := NewEventDispatcher()
 
-	locationCreatedHandler, _ := NewLocationCreatedHandler()
+	eventDispatcher, err := NewEventDispatcher()
+	if err != nil {
+		panic(err)
+	}
+
+	locationCreatedHandler, err := NewLocationCreatedHandler()
+	if err != nil {
+		panic(err)
+	}
+
 	eventDispatcher.Register("LocationCreated", locationCreatedHandler)
 
-	predicitonCreatedHandler, _ := NewPredictionCreatedHandler()
+	predicitonCreatedHandler, err := NewPredictionCreatedHandler()
+	if err != nil {
+		panic(err)
+	}
+
 	eventDispatcher.Register("PredictionCreated", predicitonCreatedHandler)
 
-	/////////////////////// U'se Cases /////////////////////////
-	pu, _ := NewCreatePredictionUseCase()
+	/////////////////////// Use Cases /////////////////////////
+	pu, err := NewCreatePredictionUseCase()
+	if err != nil {
+		panic(err)
+	}
 
 	/////////////////////// Web Handlers /////////////////////////
 	lh, err := NewLocationWebHandlers()
@@ -57,7 +71,6 @@ func main() {
 	}
 
 	/////////////////////// Web Server /////////////////////////
-
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -81,10 +94,9 @@ func main() {
 	api := router.Group("/api/v1")
 
 	///////////////////// Swagger //////////////////////
-
 	if swaggerHost, ok := os.LookupEnv("SWAGGER_HOST"); ok {
 
-		ourSwagDocs.SwaggerInfo.Host = swaggerHost
+		appSwagDocs.SwaggerInfo.Host = swaggerHost
 	}
 
 	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -94,10 +106,12 @@ func main() {
 	{
 		predictionsGroup := api.Group("/predictions")
 		{
-			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePrediction)
-			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictions)
-			predictionsGroup.GET("/location/:location_id", ph.PredictionWebHandlers.FindAllPredictionsByLocationId)
-			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByPredictionId)
+			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePredictionHandler)
+			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictionsHandler)
+			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
+			predictionsGroup.GET("/location/:id", ph.PredictionWebHandlers.FindAllPredictionsByLocationIdHandler)
+			predictionsGroup.PUT("/:id", ph.PredictionWebHandlers.UpdatePredictionHandler)
+			predictionsGroup.DELETE("/:id", ph.PredictionWebHandlers.DeletePredictionHandler)
 		}
 	}
 
@@ -106,42 +120,44 @@ func main() {
 	{
 		locationsGroup := api.Group("/locations")
 		{
-			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocation)
-			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocations)
-			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationById)
-			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocation)
-			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocation)
+			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocationHandler)
+			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocationsHandler)
+			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationByIdHandler)
+			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocationHandler)
+			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocationHandler)
 		}
 	}
 
 	go func() {
-		if err := router.Run(":8080"); err != nil {
+		if err := router.Run(":8081"); err != nil {
 			log.Fatalf("Failed to start the web server: %v", err)
 		}
 	}()
 
 	/////////////////////// Predictions Consumer /////////////////////////
+	ch, err := NewRabbitChannel()
+	if err != nil {
+		panic(err)
+	}
 
 	msgChan := make(chan amqp.Delivery)
-	rabbitmqConsumer, _ := NewRabbitMQConsumer()
 	go func() {
-		if err := rabbitmqConsumer.Consume(msgChan, "predictions"); err != nil {
+		if err := rabbitmq.NewRabbitMQConsumer(ch).Consume(msgChan, "prediction"); err != nil {
 			panic(err)
 		}
 	}()
 
 	for msg := range msgChan {
-		var prediction dto.CreatePredictionInputDTO
-		ctx := context.Background()
+		var prediction prediction_usecase.CreatePredictionInputDTO
 		err := json.Unmarshal(msg.Body, &prediction)
 		if err != nil {
 			panic(err)
 		}
-		res, err := pu.Execute(ctx, &prediction)
+		ctx := context.Background()
+		res, err := pu.Execute(ctx, prediction)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("Prediciton created: %v", res)
 	}
 }
-

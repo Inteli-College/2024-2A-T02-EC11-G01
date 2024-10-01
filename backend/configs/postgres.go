@@ -13,13 +13,10 @@ import (
 )
 
 func setupPostgres() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
-		os.Getenv("DATABASE_HOST"),
-		os.Getenv("DATABASE_USER"),
-		os.Getenv("DATABASE_PASSWORD"),
-		os.Getenv("DATABASE_NAME"),
-		os.Getenv("DATABASE_PORT"),
-	)
+	postgresUrl, isSet := os.LookupEnv("POSTGRES_URL")
+	if !isSet {
+		log.Fatalf("POSTGRES_URL is not set")
+	}
 
 	logger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
@@ -30,9 +27,12 @@ func setupPostgres() (*gorm.DB, error) {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(postgresUrl), &gorm.Config{
 		Logger: logger,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %v", err)
+	}
 
 	return db, err
 }

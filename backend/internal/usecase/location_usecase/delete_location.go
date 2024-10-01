@@ -3,9 +3,7 @@ package location_usecase
 import (
 	"context"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
-	"github.com/google/uuid"
 )
 
 type DeleteLocationUseCase struct {
@@ -18,11 +16,6 @@ func NewDeleteLocationUseCase(locationRepository entity.LocationRepository) *Del
 	}
 }
 
-func (u *DeleteLocationUseCase) Execute(ctx context.Context, input *dto.DeleteLocationInputDTO) error {
-	locationUUID, err := uuid.Parse(input.LocationId)
-	if err != nil {
-		return err
-	}
-
-	return u.LocationRepository.DeleteLocation(ctx, &locationUUID)
+func (u *DeleteLocationUseCase) Execute(ctx context.Context, input DeleteLocationInputDTO) error {
+	return u.LocationRepository.DeleteLocation(ctx, input.Id)
 }

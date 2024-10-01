@@ -30,3 +30,4 @@ var setupRabbitMQChannelOnce = sync.OnceValues(setupRabbitMQChannel)
 func SetupRabbitMQChannel() (*amqp.Channel, error) {
 	return setupRabbitMQChannelOnce()
 }
+
