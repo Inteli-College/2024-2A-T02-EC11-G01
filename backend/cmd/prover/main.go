@@ -35,11 +35,6 @@ func main() {
 		log.Fatalf("TESTNET_RPC_URL is not set")
 	}
 
-	rabbitmqChannel, isSet := os.LookupEnv("RABBITMQ_CHANNEL")
-	if !isSet {
-		log.Fatalf("RABBITMQ_CHANNEL is not set")
-	}
-
 	input_box_address, isSet := os.LookupEnv("INPUT_BOX_ADDRESS")
 	if !isSet {
 		log.Fatalf("INPUT_BOX_ADDRESS is not set")
@@ -50,7 +45,7 @@ func main() {
 		log.Fatalf("APPLICATION_ADDRESS is not set")
 	}
 
-	ch, err := configs.SetupRabbitMQChannel(rabbitmqChannel)
+	ch, err := configs.SetupRabbitMQChannel()
 	if err != nil {
 		panic(err)
 	}

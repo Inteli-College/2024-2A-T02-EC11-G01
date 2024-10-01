@@ -46,7 +46,7 @@ install-deps:
 dapp:
   @docker build -t machine:latest -f ./backend/build/Dockerfile.dapp .
   @cartesi build --from-image machine:latest
-  @cartesi run
+  @cartesi run --verbose
 
 dev:
   @cd ./backend/cmd/prover/lib && cargo build --release

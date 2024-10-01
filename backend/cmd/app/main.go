@@ -35,6 +35,9 @@ func main() {
 	/////////////////////// Event Dispatcher /////////////////////////
 
 	eventDispatcher, err := NewEventDispatcher()
+	if err != nil {
+		panic(err)
+	}
 
 	locationCreatedHandler, err := NewLocationCreatedHandler()
 	if err != nil {
@@ -51,14 +54,12 @@ func main() {
 	eventDispatcher.Register("PredictionCreated", predicitonCreatedHandler)
 
 	/////////////////////// Use Cases /////////////////////////
-
 	pu, err := NewCreatePredictionUseCase()
 	if err != nil {
 		panic(err)
 	}
 
 	/////////////////////// Web Handlers /////////////////////////
-
 	lh, err := NewLocationWebHandlers()
 	if err != nil {
 		panic(err)
@@ -70,7 +71,6 @@ func main() {
 	}
 
 	/////////////////////// Web Server /////////////////////////
-
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -93,10 +93,7 @@ func main() {
 
 	api := router.Group("/api/v1")
 
-	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	///////////////////// Swagger //////////////////////
-
 	if swaggerHost, ok := os.LookupEnv("SWAGGER_HOST"); ok {
 
 		appSwagDocs.SwaggerInfo.Host = swaggerHost
