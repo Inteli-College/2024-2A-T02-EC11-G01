@@ -10,7 +10,7 @@ verify-asdf:
     just install-asdf ; \
   fi
 
-  @if [ ! $ASDF_DIR = '' ]; then \
+  @if [ ! "${ASDF_DIR:-}" = '' ]; then \
     . "$ASDF_DIR/asdf.sh" ; \
   else \
     echo "Unable to find asdf instalation!" ; exit 1 ; \
