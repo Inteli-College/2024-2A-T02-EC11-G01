@@ -28,22 +28,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push app image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          file: build/Dockerfile.app
-          push: true
-          tags: |
-            carbonicos/app:latest
+        run: |
+          docker build -t carbonicos/app:latest -f ./backend/build/Dockerfile.app .
+          docker push carbonicos/app:latest
 
       - name: Build and push prover image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          file: build/Dockerfile.prover
-          push: true
-          tags: |
-            carbonicos/prover:latest
+        run: |
+          docker build -t carbonicos/prover:latest -f ./backend/build/Dockerfile.prover .
+          docker push carbonicos/prover:latest
 
       - name: Build and push predictor image
         uses: docker/build-push-action@v6
