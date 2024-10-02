@@ -19,23 +19,23 @@ func NewUpdatePredictionUseCase(predictionRepository entity.PredictionRepository
 
 func (u *UpdatePredictionUseCase) Execute(ctx context.Context, input UpdatePredictionInputDTO) (*UpdatePredictionOutputDTO, error) {
 	prediction, err := u.PredictionRepository.UpdatePrediction(ctx, &entity.Prediction{
-		Id:             input.Id,
-		RawImage:       input.RawImage,
-		AnnotatedImage: input.AnnotatedImage,
-		Detections:     input.Detections,
-		LocationId:     input.LocationId,
-		UpdatedAt:      time.Now(),
+		PredictionId:       input.PredictionId,
+		RawImagePath:       input.RawImagePath,
+		AnnotatedImagePath: input.AnnotatedImagePath,
+		Detections:         input.Detections,
+		LocationId:         input.LocationId,
+		UpdatedAt:          time.Now(),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &UpdatePredictionOutputDTO{
-		Id:             prediction.Id,
-		RawImage:       prediction.RawImage,
-		AnnotatedImage: prediction.AnnotatedImage,
-		Detections:     prediction.Detections,
-		LocationId:     prediction.LocationId,
-		CreatedAt:      prediction.CreatedAt,
-		UpdatedAt:      prediction.UpdatedAt,
+		PredictionId:       prediction.PredictionId,
+		RawImagePath:       prediction.RawImagePath,
+		AnnotatedImagePath: prediction.AnnotatedImagePath,
+		Detections:         prediction.Detections,
+		LocationId:         prediction.LocationId,
+		CreatedAt:          prediction.CreatedAt,
+		UpdatedAt:          prediction.UpdatedAt,
 	}, nil
 }

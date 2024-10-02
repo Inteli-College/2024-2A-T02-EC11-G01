@@ -19,21 +19,21 @@ func NewUpdateLocationUseCase(locationRepository entity.LocationRepository) *Upd
 
 func (u *UpdateLocationUseCase) Execute(ctx context.Context, input UpdateLocationInputDTO) (*UpdateLocationOutputDTO, error) {
 	location, err := u.LocationRepository.UpdateLocation(ctx, &entity.Location{
-		Id:        input.Id,
-		Name:      input.Name,
-		Latitude:  input.Latitude,
-		Longitude: input.Longitude,
-		UpdatedAt: time.Now(),
+		LocationId: input.LocationId,
+		Name:       input.Name,
+		Latitude:   input.Latitude,
+		Longitude:  input.Longitude,
+		UpdatedAt:  time.Now(),
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &UpdateLocationOutputDTO{
-		Id:        location.Id,
-		Name:      location.Name,
-		Latitude:  location.Latitude,
-		Longitude: location.Longitude,
-		CreatedAt: location.CreatedAt,
-		UpdatedAt: location.UpdatedAt,
+		LocationId: location.LocationId,
+		Name:       location.Name,
+		Latitude:   location.Latitude,
+		Longitude:  location.Longitude,
+		CreatedAt:  location.CreatedAt,
+		UpdatedAt:  location.UpdatedAt,
 	}, nil
 }

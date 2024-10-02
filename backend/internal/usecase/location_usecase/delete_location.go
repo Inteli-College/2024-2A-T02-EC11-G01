@@ -17,5 +17,5 @@ func NewDeleteLocationUseCase(locationRepository entity.LocationRepository) *Del
 }
 
 func (u *DeleteLocationUseCase) Execute(ctx context.Context, input DeleteLocationInputDTO) error {
-	return u.LocationRepository.DeleteLocation(ctx, input.Id)
+	return u.LocationRepository.DeleteLocation(ctx, input.LocationId)
 }

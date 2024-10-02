@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/locations": {
+        "/location": {
             "get": {
                 "description": "Get a list of all Locations",
                 "consumes": [
@@ -85,7 +85,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/locations/{id}": {
+        "/location/{location_id}": {
             "get": {
                 "description": "Get details of a specific Location by its ID",
                 "consumes": [
@@ -102,7 +102,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -132,7 +132,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     },
@@ -171,7 +171,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -186,7 +186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions": {
+        "/prediction": {
             "get": {
                 "description": "Get a list of all Predictions",
                 "consumes": [
@@ -247,7 +247,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions/location/{id}": {
+        "/prediction/location/{location_id}": {
             "get": {
                 "description": "Get a list of all Predictions by Location ID",
                 "consumes": [
@@ -264,7 +264,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -285,7 +285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions/{id}": {
+        "/prediction/{prediction_id}": {
             "get": {
                 "description": "Get details of a specific Prediction by its ID",
                 "consumes": [
@@ -302,7 +302,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -332,7 +332,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     },
@@ -371,7 +371,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -408,10 +408,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -428,10 +428,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -454,10 +454,10 @@ const docTemplate = `{
         "location_usecase.UpdateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -472,9 +472,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 },
                 "latitude": {
@@ -494,7 +491,7 @@ const docTemplate = `{
         "prediction_usecase.CreatePredictionInputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "detections": {
@@ -503,7 +500,7 @@ const docTemplate = `{
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -511,7 +508,7 @@ const docTemplate = `{
         "prediction_usecase.CreatePredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -520,13 +517,13 @@ const docTemplate = `{
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -534,7 +531,7 @@ const docTemplate = `{
         "prediction_usecase.FindPredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -543,13 +540,13 @@ const docTemplate = `{
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -560,19 +557,19 @@ const docTemplate = `{
         "prediction_usecase.UpdatePredictionInputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -580,7 +577,7 @@ const docTemplate = `{
         "prediction_usecase.UpdatePredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -589,13 +586,13 @@ const docTemplate = `{
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 },
                 "update_at": {

@@ -7,9 +7,11 @@ from PIL import Image
 import os
 import base64
 from src.clients.rabbitmq import RabbitMQClient
-from src.settings.settings import settings
 import pickle
+from dotenv import load_dotenv
 import uuid
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -34,12 +36,10 @@ os.makedirs(output_dir, exist_ok=True)
 
 
 def get_rabbitmq_client() -> RabbitMQClient:
-    host = settings.rabbitmq_config.host
-    queue = settings.rabbitmq_config.queue
-    username = settings.rabbitmq_config.username
-    password = settings.rabbitmq_config.password
-
-    return RabbitMQClient(host=host, queue=queue, username=username, password=password)
+    rabbitmq_url = os.getenv("RABBITMQ_URL")
+    if not rabbitmq_url:
+        raise ValueError("RABBITMQ_URL is not set in environment variables.")
+    return RabbitMQClient(rabbitmq_url)
 
 
 @app.post("/predict/")
@@ -62,12 +62,15 @@ async def predict_image(
     pil_image = Image.open(input_image_stream)
 
     # Use the model to predict
-    pil_image.save(f"{input_dir}/input_{unique_id}{file_extension}")  # Save temporarily if needed for DeepForest
-    predictions = model.predict_image(path=f"{input_dir}/input_{unique_id}{file_extension}", return_plot=False)
+    # Save temporarily if needed for DeepForest
+    pil_image.save(f"{input_dir}/input_{unique_id}{file_extension}")
+    predictions = model.predict_image(
+        path=f"{input_dir}/input_{unique_id}{file_extension}", return_plot=False)
     num_trees = len(predictions)
 
     # Convert the image from BGR to RGB for saving or processing
-    img = model.predict_image(path=f"{input_dir}/input_{unique_id}{file_extension}", return_plot=True)
+    img = model.predict_image(
+        path=f"{input_dir}/input_{unique_id}{file_extension}", return_plot=True)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     # Save the processed image in PIL
@@ -76,14 +79,15 @@ async def predict_image(
     pil_img.save(output_image_stream, format="JPEG")
 
     # Convert output image to Base64
-    encoded_output_image = base64.b64encode(output_image_stream.getvalue()).decode('utf-8')
+    encoded_output_image = base64.b64encode(
+        output_image_stream.getvalue()).decode('utf-8')
 
     # Prepare the message to be sent to RabbitMQ
     message = {
         "location_id": location_id,
         "detections": num_trees,
-        "raw_image": encoded_image,
-        "annotated_image": encoded_output_image,
+        "raw_image_path": encoded_image,
+        "annotated_image_path": encoded_output_image,
     }
     json_message = json.dumps(message)
 

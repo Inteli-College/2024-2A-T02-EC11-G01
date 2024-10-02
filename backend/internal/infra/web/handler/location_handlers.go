@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/location_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
@@ -36,7 +37,7 @@ func NewLocationHandlers(
 // @Produce json
 // @Param input body location_usecase.CreateLocationInputDTO true "Location entity to create"
 // @Success 200 {object} location_usecase.CreateLocationOutputDTO
-// @Router /locations [post]
+// @Router /location [post]
 func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 	var input location_usecase.CreateLocationInputDTO
 	ctx := context.Background()
@@ -62,16 +63,16 @@ func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 // @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
+// @Param location_id path string true "Location ID"
 // @Success 200 {object} location_usecase.FindLocationOutputDTO
-// @Router /locations/{id} [get]
+// @Router /location/{location_id} [get]
 func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 	var input location_usecase.FindLocationByIdInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
@@ -91,7 +92,7 @@ func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} location_usecase.FindAllLocationsOutputDTO
-// @Router /locations [get]
+// @Router /location [get]
 func (h *LocationHandlers) FindAllLocationsHandler(c *gin.Context) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
@@ -110,21 +111,21 @@ func (h *LocationHandlers) FindAllLocationsHandler(c *gin.Context) {
 // @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
+// @Param location_id path string true "Location ID"
 // @Param input body location_usecase.UpdateLocationInputDTO true "Location entity to update"
 // @Success 200 {object} location_usecase.UpdateLocationOutputDTO
-// @Router /locations/{id} [put]
+// @Router /location/{location_id} [put]
 func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 	var input location_usecase.UpdateLocationInputDTO
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 	ctx := context.Background()
 	res, err := location_usecase.NewUpdateLocationUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {
@@ -140,16 +141,16 @@ func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 // @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
+// @Param location_id path string true "Location ID"
 // @Success 200 {string} string "Location deleted successfully"
-// @Router /locations/{id} [delete]
+// @Router /location/{location_id} [delete]
 func (h *LocationHandlers) DeleteLocationHandler(c *gin.Context) {
 	var input location_usecase.DeleteLocationInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 	ctx := context.Background()
 	err = location_usecase.NewDeleteLocationUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {

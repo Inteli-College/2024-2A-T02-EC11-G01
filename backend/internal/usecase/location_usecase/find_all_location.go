@@ -2,6 +2,7 @@ package location_usecase
 
 import (
 	"context"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
 )
@@ -26,17 +27,17 @@ func (u *FindAllLocationsUseCase) Execute(ctx context.Context) (*FindAllLocation
 		predictions := make([]*prediction_usecase.FindPredictionOutputDTO, len(location.Predictions))
 		for j, prediction := range location.Predictions {
 			predictions[j] = &prediction_usecase.FindPredictionOutputDTO{
-				Id:             prediction.Id,
-				RawImage:       prediction.RawImage,
-				AnnotatedImage: prediction.AnnotatedImage,
-				Detections:     prediction.Detections,
-				LocationId:     prediction.LocationId,
-				CreatedAt:      prediction.CreatedAt,
-				UpdatedAt:      prediction.UpdatedAt,
+				PredictionId:       prediction.PredictionId,
+				RawImagePath:       prediction.RawImagePath,
+				AnnotatedImagePath: prediction.AnnotatedImagePath,
+				Detections:         prediction.Detections,
+				LocationId:         prediction.LocationId,
+				CreatedAt:          prediction.CreatedAt,
+				UpdatedAt:          prediction.UpdatedAt,
 			}
 		}
 		output[i] = &FindLocationOutputDTO{
-			Id:          location.Id,
+			LocationId:  location.LocationId,
 			Name:        location.Name,
 			Latitude:    location.Latitude,
 			Longitude:   location.Longitude,

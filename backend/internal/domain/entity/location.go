@@ -22,7 +22,7 @@ type LocationRepository interface {
 }
 
 type Location struct {
-	Id          uuid.UUID     `json:"id,omitempty" gorm:"primarykey;type:uuid"`
+	LocationId uuid.UUID     `json:"location_id,omitempty" gorm:"primarykey;type:uuid"`
 	Name        string        `json:"name" gorm:"type:text"`
 	Latitude    string        `json:"latitude" gorm:"type:text"`
 	Longitude   string        `json:"longitude" gorm:"type:text"`
@@ -33,11 +33,11 @@ type Location struct {
 
 func NewLocation(name string, latitude string, longitude string) (*Location, error) {
 	location := &Location{
-		Id:        uuid.New(),
-		Name:      name,
-		Latitude:  latitude,
-		Longitude: longitude,
-		CreatedAt: time.Now(),
+		LocationId: uuid.New(),
+		Name:        name,
+		Latitude:    latitude,
+		Longitude:   longitude,
+		CreatedAt:   time.Now(),
 	}
 	if err := location.Validate(); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func NewLocation(name string, latitude string, longitude string) (*Location, err
 }
 
 func (l *Location) Validate() error {
-	if l.Id == uuid.Nil || l.Name == "" || l.Latitude == "" || l.Longitude == "" || l.CreatedAt.IsZero() {
+	if l.LocationId == uuid.Nil || l.Name == "" || l.Latitude == "" || l.Longitude == "" || l.CreatedAt.IsZero() {
 		return ErrInvalidLocation
 	}
 	return nil

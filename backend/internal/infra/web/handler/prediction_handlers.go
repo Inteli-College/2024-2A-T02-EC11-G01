@@ -37,7 +37,7 @@ func NewPredictionHandlers(
 // @Produce json
 // @Param input body prediction_usecase.CreatePredictionInputDTO true "Prediction entity to create"
 // @Success 200 {object} prediction_usecase.CreatePredictionOutputDTO
-// @Router /predictions [post]
+// @Router /prediction [post]
 func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.CreatePredictionInputDTO
 	ctx := context.Background()
@@ -63,16 +63,16 @@ func (h *PredictionHandlers) CreatePredictionHandler(c *gin.Context) {
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param id path string true "Prediction ID"
+// @Param prediction_id path string true "Prediction ID"
 // @Success 200 {object} prediction_usecase.FindPredictionOutputDTO
-// @Router /predictions/{id} [get]
+// @Router /prediction/{prediction_id} [get]
 func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
 	var input prediction_usecase.FindPredictionByIdInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	predictionId, err := uuid.Parse(c.Param("prediction_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.PredictionId = predictionId
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
@@ -91,16 +91,16 @@ func (h *PredictionHandlers) FindPredictionByIdHandler(c *gin.Context) {
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
+// @Param location_id path string true "Location ID"
 // @Success 200 {array} prediction_usecase.FindAllPredictionsByLocationIdOutputDTO
-// @Router /predictions/location/{id} [get]
+// @Router /prediction/location/{location_id} [get]
 func (h *PredictionHandlers) FindAllPredictionsByLocationIdHandler(c *gin.Context) {
 	var input prediction_usecase.FindAllPredictionsByLocationIdInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.LocationId = id
+	input.LocationId = locationId
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
 	ctx = context.WithValue(ctx, "offset", c.DefaultQuery("offset", "0"))
@@ -119,7 +119,7 @@ func (h *PredictionHandlers) FindAllPredictionsByLocationIdHandler(c *gin.Contex
 // @Accept json
 // @Produce json
 // @Success 200 {array} prediction_usecase.FindAllPredictionsOutputDTO
-// @Router /predictions [get]
+// @Router /prediction [get]
 func (h *PredictionHandlers) FindAllPredictionsHandler(c *gin.Context) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
@@ -138,21 +138,21 @@ func (h *PredictionHandlers) FindAllPredictionsHandler(c *gin.Context) {
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param id path string true "Prediction ID"
+// @Param prediction_id path string true "Prediction ID"
 // @Param input body prediction_usecase.UpdatePredictionInputDTO true "Prediction entity to update"
 // @Success 200 {object} prediction_usecase.UpdatePredictionOutputDTO
-// @Router /predictions/{id} [put]
+// @Router /prediction/{prediction_id} [put]
 func (h *PredictionHandlers) UpdatePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.UpdatePredictionInputDTO
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	id, err := uuid.Parse(c.Param("id"))
+	predictionId, err := uuid.Parse(c.Param("prediction_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.PredictionId = predictionId
 	ctx := context.Background()
 	res, err := prediction_usecase.NewUpdatePredictionUseCase(h.PredictionRepository).Execute(ctx, input)
 	if err != nil {
@@ -168,16 +168,16 @@ func (h *PredictionHandlers) UpdatePredictionHandler(c *gin.Context) {
 // @Tags Predictions
 // @Accept json
 // @Produce json
-// @Param id path string true "Prediction ID"
+// @Param prediction_id path string true "Prediction ID"
 // @Success 200 {string} string "Prediction deleted successfully"
-// @Router /predictions/{id} [delete]
+// @Router /prediction/{prediction_id} [delete]
 func (h *PredictionHandlers) DeletePredictionHandler(c *gin.Context) {
 	var input prediction_usecase.DeletePredictionInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	predictionId, err := uuid.Parse(c.Param("prediction_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.PredictionId = predictionId
 	ctx := context.Background()
 	err = prediction_usecase.NewDeletePredictionUseCase(h.PredictionRepository).Execute(ctx, input)
 	if err != nil {

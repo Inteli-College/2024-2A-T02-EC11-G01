@@ -9,6 +9,7 @@ import (
 	appSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/penglongli/gin-metrics/ginmetrics"
@@ -34,38 +35,33 @@ import (
 func main() {
 	/////////////////////// Event Dispatcher /////////////////////////
 
-	eventDispatcher, err := NewEventDispatcher()
-	if err != nil {
-		panic(err)
-	}
+	eventDispatcher := events.NewEventDispatcher()
 
 	locationCreatedHandler, err := NewLocationCreatedHandler()
 	if err != nil {
 		panic(err)
 	}
-
 	eventDispatcher.Register("LocationCreated", locationCreatedHandler)
 
-	predicitonCreatedHandler, err := NewPredictionCreatedHandler()
+	predictionCreatedHandler, err := NewPredictionCreatedHandler()
 	if err != nil {
 		panic(err)
 	}
-
-	eventDispatcher.Register("PredictionCreated", predicitonCreatedHandler)
+	eventDispatcher.Register("PredictionCreated", predictionCreatedHandler)
 
 	/////////////////////// Use Cases /////////////////////////
-	pu, err := NewCreatePredictionUseCase()
+	pu, err := NewCreatePredictionUseCase(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}
 
 	/////////////////////// Web Handlers /////////////////////////
-	lh, err := NewLocationWebHandlers()
+	lh, err := NewLocationWebHandlers(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}
 
-	ph, err := NewPredicitonWebHandlers()
+	ph, err := NewPredicitonWebHandlers(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}
@@ -104,27 +100,27 @@ func main() {
 	///////////////////////// Predictions ///////////////////////////
 
 	{
-		predictionsGroup := api.Group("/predictions")
+		predictionsGroup := api.Group("/prediction")
 		{
 			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePredictionHandler)
 			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictionsHandler)
-			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
-			predictionsGroup.GET("/location/:id", ph.PredictionWebHandlers.FindAllPredictionsByLocationIdHandler)
-			predictionsGroup.PUT("/:id", ph.PredictionWebHandlers.UpdatePredictionHandler)
-			predictionsGroup.DELETE("/:id", ph.PredictionWebHandlers.DeletePredictionHandler)
+			predictionsGroup.GET("/:prediction_id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
+			predictionsGroup.GET("/location/:location_id", ph.PredictionWebHandlers.FindAllPredictionsByLocationIdHandler)
+			predictionsGroup.PUT("/:prediction_id", ph.PredictionWebHandlers.UpdatePredictionHandler)
+			predictionsGroup.DELETE("/:prediction_id", ph.PredictionWebHandlers.DeletePredictionHandler)
 		}
 	}
 
 	///////////////////////// Locations ///////////////////////////
 
 	{
-		locationsGroup := api.Group("/locations")
+		locationsGroup := api.Group("/location")
 		{
 			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocationHandler)
 			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocationsHandler)
-			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationByIdHandler)
-			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocationHandler)
-			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocationHandler)
+			locationsGroup.GET("/:location_id", lh.LocationWebHandlers.FindLocationByIdHandler)
+			locationsGroup.PUT("/:location_id", lh.LocationWebHandlers.UpdateLocationHandler)
+			locationsGroup.DELETE("/:location_id", lh.LocationWebHandlers.DeleteLocationHandler)
 		}
 	}
 
