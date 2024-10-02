@@ -22,7 +22,7 @@ type FindAllPredictionsByLocationIdInputDTO struct {
 }
 
 type UpdatePredictionInputDTO struct {
-	PredictionId       uuid.UUID `json:"prediction_id"`
+	PredictionId       uuid.UUID `json:"-" binding:"-"`
 	RawImagePath       string    `json:"raw_image_path"`
 	AnnotatedImagePath string    `json:"annotated_image_path"`
 	Detections         uint      `json:"detections"`

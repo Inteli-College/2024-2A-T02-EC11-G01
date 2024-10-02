@@ -18,7 +18,7 @@
     "host": "localhost:8081",
     "basePath": "/api/v1",
     "paths": {
-        "/locations": {
+        "/location": {
             "get": {
                 "description": "Get a list of all Locations",
                 "consumes": [
@@ -79,7 +79,7 @@
                 }
             }
         },
-        "/locations/{id}": {
+        "/location/{location_id}": {
             "get": {
                 "description": "Get details of a specific Location by its ID",
                 "consumes": [
@@ -96,7 +96,7 @@
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -126,7 +126,7 @@
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     },
@@ -165,7 +165,7 @@
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -180,7 +180,7 @@
                 }
             }
         },
-        "/predictions": {
+        "/prediction": {
             "get": {
                 "description": "Get a list of all Predictions",
                 "consumes": [
@@ -241,7 +241,7 @@
                 }
             }
         },
-        "/predictions/location/{id}": {
+        "/prediction/location/{location_id}": {
             "get": {
                 "description": "Get a list of all Predictions by Location ID",
                 "consumes": [
@@ -258,7 +258,7 @@
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -279,7 +279,7 @@
                 }
             }
         },
-        "/predictions/{id}": {
+        "/prediction/{prediction_id}": {
             "get": {
                 "description": "Get details of a specific Prediction by its ID",
                 "consumes": [
@@ -296,7 +296,7 @@
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -326,7 +326,7 @@
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     },
@@ -365,7 +365,7 @@
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -469,9 +469,6 @@
                     "type": "string"
                 },
                 "latitude": {
-                    "type": "string"
-                },
-                "location_id": {
                     "type": "string"
                 },
                 "longitude": {

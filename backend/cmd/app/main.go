@@ -100,27 +100,27 @@ func main() {
 	///////////////////////// Predictions ///////////////////////////
 
 	{
-		predictionsGroup := api.Group("/predictions")
+		predictionsGroup := api.Group("/prediction")
 		{
 			predictionsGroup.POST("", ph.PredictionWebHandlers.CreatePredictionHandler)
 			predictionsGroup.GET("", ph.PredictionWebHandlers.FindAllPredictionsHandler)
-			predictionsGroup.GET("/:id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
-			predictionsGroup.GET("/location/:id", ph.PredictionWebHandlers.FindAllPredictionsByLocationIdHandler)
-			predictionsGroup.PUT("/:id", ph.PredictionWebHandlers.UpdatePredictionHandler)
-			predictionsGroup.DELETE("/:id", ph.PredictionWebHandlers.DeletePredictionHandler)
+			predictionsGroup.GET("/:prediction_id", ph.PredictionWebHandlers.FindPredictionByIdHandler)
+			predictionsGroup.GET("/location/:location_id", ph.PredictionWebHandlers.FindAllPredictionsByLocationIdHandler)
+			predictionsGroup.PUT("/:prediction_id", ph.PredictionWebHandlers.UpdatePredictionHandler)
+			predictionsGroup.DELETE("/:prediction_id", ph.PredictionWebHandlers.DeletePredictionHandler)
 		}
 	}
 
 	///////////////////////// Locations ///////////////////////////
 
 	{
-		locationsGroup := api.Group("/locations")
+		locationsGroup := api.Group("/location")
 		{
 			locationsGroup.POST("", lh.LocationWebHandlers.CreateLocationHandler)
 			locationsGroup.GET("", lh.LocationWebHandlers.FindAllLocationsHandler)
-			locationsGroup.GET("/:id", lh.LocationWebHandlers.FindLocationByIdHandler)
-			locationsGroup.PUT("/:id", lh.LocationWebHandlers.UpdateLocationHandler)
-			locationsGroup.DELETE("/:id", lh.LocationWebHandlers.DeleteLocationHandler)
+			locationsGroup.GET("/:location_id", lh.LocationWebHandlers.FindLocationByIdHandler)
+			locationsGroup.PUT("/:location_id", lh.LocationWebHandlers.UpdateLocationHandler)
+			locationsGroup.DELETE("/:location_id", lh.LocationWebHandlers.DeleteLocationHandler)
 		}
 	}
 

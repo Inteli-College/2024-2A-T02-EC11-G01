@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/locations": {
+        "/location": {
             "get": {
                 "description": "Get a list of all Locations",
                 "consumes": [
@@ -85,7 +85,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/locations/{id}": {
+        "/location/{location_id}": {
             "get": {
                 "description": "Get details of a specific Location by its ID",
                 "consumes": [
@@ -102,7 +102,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -132,7 +132,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     },
@@ -171,7 +171,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -186,7 +186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions": {
+        "/prediction": {
             "get": {
                 "description": "Get a list of all Predictions",
                 "consumes": [
@@ -247,7 +247,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions/location/{id}": {
+        "/prediction/location/{location_id}": {
             "get": {
                 "description": "Get a list of all Predictions by Location ID",
                 "consumes": [
@@ -264,7 +264,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Location ID",
-                        "name": "id",
+                        "name": "location_id",
                         "in": "path",
                         "required": true
                     }
@@ -285,7 +285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/predictions/{id}": {
+        "/prediction/{prediction_id}": {
             "get": {
                 "description": "Get details of a specific Prediction by its ID",
                 "consumes": [
@@ -302,7 +302,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -332,7 +332,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     },
@@ -371,7 +371,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Prediction ID",
-                        "name": "id",
+                        "name": "prediction_id",
                         "in": "path",
                         "required": true
                     }
@@ -475,9 +475,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "latitude": {
-                    "type": "string"
-                },
-                "location_id": {
                     "type": "string"
                 },
                 "longitude": {

@@ -35,10 +35,10 @@ type FindLocationOutputDTO struct {
 }
 
 type UpdateLocationInputDTO struct {
-	LocationId uuid.UUID `json:"location_id"`
-	Name       string    `json:"name"`
-	Latitude   string    `json:"latitude"`
-	Longitude  string    `json:"longitude"`
+	LocationId uuid.UUID `json:"-" binding:"-"`
+	Name       string    `json:"name" binding:"required"`
+	Latitude   string    `json:"latitude" binding:"required"`
+	Longitude  string    `json:"longitude" binding:"required"`
 }
 
 type FindAllLocationsOutputDTO []*FindLocationOutputDTO
