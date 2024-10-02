@@ -14,6 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Log in to Amazon ECR
         id: ecr-login
         run: |
@@ -33,84 +40,3 @@ jobs:
             docker tag $image_name $REPOSITORY_URL:$IMAGE_TAG
             docker push $REPOSITORY_URL:$IMAGE_TAG
           done
-
-
-# name: Deploy to AWS
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       - name: Setup SSH
-#         uses: webfactory/ssh-agent@v0.5.4
-#         with:
-#           ssh-private-key: ${{ secrets.EC2_PEM }}
-
-#       - name: Run docker-compose inside EC2
-#         env:
-#           EC2_HOST: ${{ secrets.EC2_HOST }}
-#           EC2_USER: ubuntu
-          
-#         run: |
-#           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-#             cd ~/2024-2A-T02-EC11-G01
-#             git checkout main
-#             git pull
-
-#             # Enter predictor directory and download the file from S3
-#             echo "Entering predictor directory"
-#             cd predictor
-
-#             # Configure AWS CLI credentials using environment variables (or directly in the configuration file)
-#             echo "Configuring AWS CLI"
-#             aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-#             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#             aws configure set default.region ${{ secrets.AWS_\REGION }}
-
-#             # Download the file from S3
-#             echo "Downloading file from S3"
-#             aws s3 cp s3://bucket-name/file-path local-file-path
-
-#             # Check if the file was downloaded successfully
-#             if [ ! -f local-file-path ]; then
-#                 echo "File not found! Exiting."
-#                 exit 1
-#             fi
-
-#             # Only run docker-compose up after the file download
-#             cd ..
-#             echo "Stopping and removing old containers"
-#             docker compose down
-#             echo "Building and starting containers"
-#             docker compose up -d --build
-
-#             COMPOSE_UP_EXIT_CODE=$?
-#             if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
-#                 echo "docker compose up failed"
-#                 exit 1
-#             fi
-
-#             sleep 10  # Wait a few seconds to ensure the services are started
-#             # Check the status of the containers
-#             STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
-#             if [ -n "$STATUS" ]; then
-#                 echo "One or more services are not running correctly"
-#                 exit 1
-#             fi
-#             # Optionally check container logs for error messages
-#             LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
-#             if [ -n "$LOGS" ]; then
-#                 echo "Error found in container logs"
-#                 echo "$LOGS"
-#                 exit 1
-#             fi
-#           EOF
