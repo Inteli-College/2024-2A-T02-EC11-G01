@@ -4,6 +4,8 @@ volumes:
 
 services:
   app:
+    profiles:
+      - prod
     container_name: app
     hostname: app
     restart: always
@@ -17,8 +19,10 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-  
+
   prover:
+    profiles:
+      - prod
     container_name: prover
     hostname: prover
     restart: always
@@ -34,9 +38,12 @@ services:
         condition: service_healthy
 
   predictor:
+    profiles:
+      - prod
     container_name: predictor
     hostname: predictor
     restart: always
+    platform: linux/amd64
     ports:
       - "8083:8000"
     env_file:
@@ -69,6 +76,8 @@ services:
       retries: 5
 
   migrations:
+    profiles:
+      - prod
     build:
       context: ./infraestructure/database
       dockerfile: Dockerfile
@@ -80,6 +89,8 @@ services:
         condition: service_healthy
 
   prometheus:
+    profiles:
+      - prod
     container_name: prometheus-service
     image: prom/prometheus
     restart: always
@@ -93,6 +104,8 @@ services:
       - "9090:9090"
 
   grafana:
+    profiles:
+      - prod
     container_name: grafana
     image: grafana/grafana-oss:latest
     user: "0"
@@ -106,6 +119,8 @@ services:
       - ./infraestructure/grafana/grafana_settings.ini:/etc/grafana/grafana_settings.ini
 
   rabbitmq:
+    profiles:
+      - prod
     container_name: rabbitmq
     build: ./infraestructure/rabbitmq
     ports:

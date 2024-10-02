@@ -71,3 +71,8 @@ dapp:
 dev: install-deps
   @cd ./backend/cmd/prover/lib && cargo build --release
   @docker compose up --build
+
+[group('prod')]
+prod:
+  @cd ./backend/cmd/prover/lib && cargo build --release
+  @docker compose up --build --profile prod
