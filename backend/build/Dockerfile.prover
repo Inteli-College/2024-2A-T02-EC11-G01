@@ -29,7 +29,6 @@ RUN apk add --no-cache clang lld musl-dev libressl-dev pkgconfig git
 # output directory before the cache mounted /app/target is unmounted.
 RUN --mount=type=bind,source=./cmd/prover/lib/src,target=src \
     --mount=type=bind,source=./cmd/prover/lib/Cargo.toml,target=Cargo.toml \
-    --mount=type=bind,source=./cmd/prover/lib/Cargo.lock,target=Cargo.lock \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
