@@ -1,56 +1,116 @@
-name: Deploy to AWS
+name: Build and Push Docker Image to ECR and update machine
 
 on:
   push:
     branches:
-      - main
+      - feat/github-workflow
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  build_and_push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.EC2_PEM }}
-
-      - name: Run docker-compose inside EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ubuntu
-          
+      - name: Log in to Amazon ECR
+        id: ecr-login
         run: |
-          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-            cd ~/2024-2A-T02-EC11-G01
-            git checkout main
-            git pull
-            echo "Stopping and removing old containers"
-            docker compose down
-            echo "Building and starting containers"
-            docker compose up -d --build
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-            COMPOSE_UP_EXIT_CODE=$?
-            if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
-                echo "docker compose up failed"
-                exit 1
-            fi
+      - name: Build Docker Compose images
+        run: |
+          docker-compose -f docker-compose.yml build
 
-            sleep 10  # Aguardar alguns segundos para garantir que os serviços estejam iniciados
-            # Verificar o status dos containers
-            STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
-            if [ -n "$STATUS" ]; then
-                echo "One or more services are not running correctly"
-                exit 1
-            fi
-            # Verificar logs dos containers para mensagens de erro (opcional)
-            LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
-            if [ -n "$LOGS" ]; then
-                echo "Error found in container logs"
-                echo "$LOGS"
-                exit 1
-            fi
-          EOF
+      - name: Tag and Push Docker images to ECR
+        run: |
+          IMAGE_TAG=latest
+          REPOSITORY_URL=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/carbonicos
+          
+          docker-compose -f docker-compose.yml config | grep image | awk '{print $2}' | while read image_name; do
+            image_base=$(basename $image_name)
+            docker tag $image_name $REPOSITORY_URL:$IMAGE_TAG
+            docker push $REPOSITORY_URL:$IMAGE_TAG
+          done
+
+
+# name: Deploy to AWS
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Setup SSH
+#         uses: webfactory/ssh-agent@v0.5.4
+#         with:
+#           ssh-private-key: ${{ secrets.EC2_PEM }}
+
+#       - name: Run docker-compose inside EC2
+#         env:
+#           EC2_HOST: ${{ secrets.EC2_HOST }}
+#           EC2_USER: ubuntu
+          
+#         run: |
+#           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+#             cd ~/2024-2A-T02-EC11-G01
+#             git checkout main
+#             git pull
+
+#             # Enter predictor directory and download the file from S3
+#             echo "Entering predictor directory"
+#             cd predictor
+
+#             # Configure AWS CLI credentials using environment variables (or directly in the configuration file)
+#             echo "Configuring AWS CLI"
+#             aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+#             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#             aws configure set default.region ${{ secrets.AWS_\REGION }}
+
+#             # Download the file from S3
+#             echo "Downloading file from S3"
+#             aws s3 cp s3://bucket-name/file-path local-file-path
+
+#             # Check if the file was downloaded successfully
+#             if [ ! -f local-file-path ]; then
+#                 echo "File not found! Exiting."
+#                 exit 1
+#             fi
+
+#             # Only run docker-compose up after the file download
+#             cd ..
+#             echo "Stopping and removing old containers"
+#             docker compose down
+#             echo "Building and starting containers"
+#             docker compose up -d --build
+
+#             COMPOSE_UP_EXIT_CODE=$?
+#             if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
+#                 echo "docker compose up failed"
+#                 exit 1
+#             fi
+
+#             sleep 10  # Wait a few seconds to ensure the services are started
+#             # Check the status of the containers
+#             STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
+#             if [ -n "$STATUS" ]; then
+#                 echo "One or more services are not running correctly"
+#                 exit 1
+#             fi
+#             # Optionally check container logs for error messages
+#             LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
+#             if [ -n "$LOGS" ]; then
+#                 echo "Error found in container logs"
+#                 echo "$LOGS"
+#                 exit 1
+#             fi
+#           EOF
