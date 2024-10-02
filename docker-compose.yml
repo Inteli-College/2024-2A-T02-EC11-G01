@@ -7,6 +7,7 @@ services:
     profiles:
       - prod
     container_name: app
+    image: carbonicos/app:latest
     hostname: app
     restart: always
     ports:
@@ -24,6 +25,7 @@ services:
     profiles:
       - prod
     container_name: prover
+    image: carbonicos/prover:latest
     hostname: prover
     restart: always
     ports:
@@ -41,6 +43,7 @@ services:
     profiles:
       - prod
     container_name: predictor
+    image: carbonicos/predictor:latest
     hostname: predictor
     restart: always
     platform: linux/amd64
@@ -78,6 +81,7 @@ services:
   migrations:
     profiles:
       - prod
+    image: carbonicos/migrations:latest
     build:
       context: ./infraestructure/database
       dockerfile: Dockerfile
@@ -122,6 +126,7 @@ services:
     profiles:
       - prod
     container_name: rabbitmq
+    image: carbonicos/rabbitmq:latest
     build: ./infraestructure/rabbitmq
     ports:
       - "5672:5672"

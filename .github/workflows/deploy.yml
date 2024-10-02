@@ -1,53 +1,119 @@
-name: Deploy to AWS
+name: Build and Push Docker Images to DockerHub
 
 on:
   push:
     branches:
-      - main
+      - feat/github-workflow
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  build_and_push:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        service: [app, prover, predictor, migrations, rabbitmq]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          case ${{ matrix.service }} in
+            app)
+              cd backend
+              docker build -t carbonicos/app:latest -f ./build/Dockerfile.app .
+              docker push carbonicos/app:latest
+              ;;
+            prover)
+              cd backend
+              docker build -t carbonicos/prover:latest -f ./build/Dockerfile.prover .
+              docker push carbonicos/prover:latest
+              ;;
+            predictor)
+              cd predictor
+              docker build -t carbonicos/predictor:latest .
+              docker push carbonicos/predictor:latest
+              ;;
+            migrations)
+              cd infraestructure/database
+              docker build -t carbonicos/migrations:latest .
+              docker push carbonicos/migrations:latest
+              ;;
+            rabbitmq)
+              cd infraestructure/rabbitmq
+              docker build -t carbonicos/rabbitmq:latest .
+              docker push carbonicos/rabbitmq:latest
+              ;;
+          esac
+  final_step:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+    steps:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.EC2_PEM }}
 
-      - name: Run docker-compose inside EC2
+      - name: Run docker commands inside EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ubuntu
-          
+          SHARED_ENV_FILE: ${{ secrets.SHARED_ENV_FILE }}
         run: |
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd ~/2024-2A-T02-EC11-G01
             git checkout main
             git pull
             echo "Stopping and removing old containers"
-            docker compose down
-            echo "Building and starting containers"
-            docker compose up -d --build
+            docker stop $(docker ps -q) || true
+            docker rm $(docker ps -a -q) || true
 
-            COMPOSE_UP_EXIT_CODE=$?
-            if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
-                echo "docker compose up failed"
-                exit 1
-            fi
+            echo "Creating shared .env file"
+            echo "$SHARED_ENV_FILE" > .env
 
-            sleep 10  # Aguardar alguns segundos para garantir que os serviços estejam iniciados
-            # Verificar o status dos containers
-            STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
+            echo "Pulling latest images"
+            docker pull carbonicos/app:latest &
+            docker pull carbonicos/prover:latest &
+            docker pull carbonicos/predictor:latest &
+            docker pull carbonicos/migrations:latest &
+            docker pull carbonicos/rabbitmq:latest &
+            wait  # Wait for all images to be pulled
+
+            echo "Starting containers"
+            docker run -d --name app --env-file .env -p 8081:8081 carbonicos/app:latest &
+            docker run -d --name prover --env-file .env -p 8082:8082 carbonicos/prover:latest &
+            docker run -d --name predictor --env-file .env -p 8083:8000 carbonicos/predictor:latest &
+            docker run -d --name migrations --env-file .env carbonicos/migrations:latest &
+            docker run -d --name rabbitmq --env-file .env -p 5672:5672 -p 15672:15672 carbonicos/rabbitmq:latest &
+            wait  # Wait for all containers to start
+
+            sleep 10  # Wait for services to start
+            echo "Checking container statuses"
+            STATUS=$(docker ps | grep -E "Exit|Restarting" || true)
             if [ -n "$STATUS" ]; then
                 echo "One or more services are not running correctly"
                 exit 1
             fi
-            # Verificar logs dos containers para mensagens de erro (opcional)
-            LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
+
+            echo "Checking for errors in logs"
+            LOGS=$(docker logs app 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs prover 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs predictor 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs migrations 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs rabbitmq 2>&1 | grep -i "error" || true)
+
             if [ -n "$LOGS" ]; then
                 echo "Error found in container logs"
                 echo "$LOGS"
