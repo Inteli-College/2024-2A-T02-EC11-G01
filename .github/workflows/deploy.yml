@@ -3,7 +3,7 @@ name: Build and Push Docker Images to DockerHub
 on:
   push:
     branches:
-      - main
+      - feat/github-workflow
   workflow_dispatch:
 
 jobs:
@@ -70,6 +70,7 @@ jobs:
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ubuntu
+          SHARED_ENV_FILE: ${{ secrets.SHARED_ENV_FILE }}
         run: |
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd ~/2024-2A-T02-EC11-G01
@@ -78,6 +79,9 @@ jobs:
             echo "Stopping and removing old containers"
             docker stop $(docker ps -q) || true
             docker rm $(docker ps -a -q) || true
+
+            echo "Creating shared .env file"
+            echo "$SHARED_ENV_FILE" > .env
 
             echo "Pulling latest images"
             docker pull carbonicos/app:latest &
@@ -88,12 +92,12 @@ jobs:
             wait  # Wait for all images to be pulled
 
             echo "Starting containers"
-            docker run -d --name app carbonicos/app:latest &
-            docker run -d --name prover carbonicos/prover:latest &
-            docker run -d --name predictor carbonicos/predictor:latest &
-            docker run -d --name migrations carbonicos/migrations:latest &
-            docker run -d --name rabbitmq carbonicos/rabbitmq:latest &
-            wait  # Wait for all containers to be started
+            docker run -d --name app --env-file .env -p 8081:8081 carbonicos/app:latest &
+            docker run -d --name prover --env-file .env -p 8082:8082 carbonicos/prover:latest &
+            docker run -d --name predictor --env-file .env -p 8083:8000 carbonicos/predictor:latest &
+            docker run -d --name migrations --env-file .env carbonicos/migrations:latest &
+            docker run -d --name rabbitmq --env-file .env -p 5672:5672 -p 15672:15672 carbonicos/rabbitmq:latest &
+            wait  # Wait for all containers to start
 
             sleep 10  # Wait for services to start
             echo "Checking container statuses"
@@ -116,4 +120,3 @@ jobs:
                 exit 1
             fi
           EOF
-        
