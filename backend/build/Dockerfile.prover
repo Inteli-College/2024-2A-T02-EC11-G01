@@ -28,13 +28,13 @@ RUN apk add --no-cache clang lld musl-dev libressl-dev pkgconfig git
 # source code into the container. Once built, copy the executable to an
 # output directory before the cache mounted /app/target is unmounted.
 RUN --mount=type=bind,source=./cmd/prover/lib/src,target=src \
-    --mount=type=bind,source=./cmd/prover/lib/Cargo.toml,target=Cargo.toml \
-    --mount=type=bind,source=./cmd/prover/lib/Cargo.lock,target=Cargo.lock \
-    --mount=type=cache,target=/app/target/ \
-    --mount=type=cache,target=/usr/local/cargo/git/db \
-    --mount=type=cache,target=/usr/local/cargo/registry/ \
-    cargo build --locked --release && \
-    cp target/release/lib${APP_NAME}.a /usr/lib
+  --mount=type=bind,source=./cmd/prover/lib/Cargo.toml,target=Cargo.toml \
+  --mount=type=bind,source=./cmd/prover/lib/Cargo.lock,target=Cargo.lock \
+  --mount=type=cache,target=/app/target/ \
+  --mount=type=cache,target=/usr/local/cargo/git/db \
+  --mount=type=cache,target=/usr/local/cargo/registry/ \
+  cargo build --locked --release && \
+  cp target/release/lib${APP_NAME}.a /usr/lib
 
 ################################################################################
 # Create a stage for building the application.
@@ -52,9 +52,9 @@ COPY --from=rust_build /usr/lib/lib${APP_NAME}.a /usr/lib/
 # Leverage bind mounts to go.sum and go.mod to avoid having to copy them into
 # the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
-    --mount=type=bind,source=./go.sum,target=./go.sum \
-    --mount=type=bind,source=./go.mod,target=./go.mod \
-    go mod download -x
+  --mount=type=bind,source=./go.sum,target=./go.sum \
+  --mount=type=bind,source=./go.mod,target=./go.mod \
+  go mod download -x
 
 # This is the architecture you’re building for, which is passed in by the builder.
 # Placing it here allows the previous steps to be cached across architectures.
@@ -65,8 +65,8 @@ ARG TARGETARCH
 # Leverage a bind mount to the current directory to avoid having to copy the
 # source code into the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
-    --mount=type=bind,target=. \
-    CGO_ENABLED=1 GOARCH=$TARGETARCH go build -o /bin/app /src/cmd/prover
+  --mount=type=bind,target=. \
+  CGO_ENABLED=1 GOARCH=$TARGETARCH go build -ldflags '-extldflags "-static"' -o /bin/app /src/cmd/prover
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
@@ -84,23 +84,23 @@ FROM alpine:latest AS final
 # Install any runtime dependencies that are needed to run your application.
 # Leverage a cache mount to /var/cache/apk/ to speed up subsequent builds.
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk --update add \
-        ca-certificates \
-        tzdata \
-        && \
-        update-ca-certificates
+  apk --update add \
+  ca-certificates \
+  tzdata \
+  && \
+  update-ca-certificates
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 ARG UID=10001
 RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
+  --disabled-password \
+  --gecos "" \
+  --home "/nonexistent" \
+  --shell "/sbin/nologin" \
+  --no-create-home \
+  --uid "${UID}" \
+  appuser
 USER appuser
 
 # Copy the executable from the "build" stage.

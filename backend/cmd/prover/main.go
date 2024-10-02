@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo LDFLAGS: -L./lib -lprover -lpthread -ldl -lm -lstdc++ -static
+#cgo LDFLAGS: -L./lib -lprover -lpthread -ldl -lm -lstdc++
 #cgo CFLAGS: -I./include
 
 #include <stdlib.h>
@@ -13,6 +13,7 @@ import "C"
 import (
 	"log"
 	"os"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/configs"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/rollups_contracts"
