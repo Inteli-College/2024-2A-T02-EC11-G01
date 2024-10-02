@@ -29,12 +29,14 @@ jobs:
 
       - name: Build and push app image
         run: |
-          docker build -t carbonicos/app:latest -f ./backend/build/Dockerfile.app .
+          cd backend
+          docker build -t carbonicos/app:latest -f ./build/Dockerfile.app .
           docker push carbonicos/app:latest
 
       - name: Build and push prover image
         run: |
-          docker build -t carbonicos/prover:latest -f ./backend/build/Dockerfile.prover .
+          cd backend
+          docker build -t carbonicos/prover:latest -f ./build/Dockerfile.prover .
           docker push carbonicos/prover:latest
 
       - name: Build and push predictor image
