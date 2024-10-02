@@ -67,11 +67,11 @@ func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
 // @Router /locations/{id} [get]
 func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
 	var input location_usecase.FindLocationByIdInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
@@ -120,11 +120,11 @@ func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 	ctx := context.Background()
 	res, err := location_usecase.NewUpdateLocationUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {
@@ -145,11 +145,11 @@ func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
 // @Router /locations/{id} [delete]
 func (h *LocationHandlers) DeleteLocationHandler(c *gin.Context) {
 	var input location_usecase.DeleteLocationInputDTO
-	id, err := uuid.Parse(c.Param("id"))
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	input.Id = id
+	input.LocationId = locationId
 	ctx := context.Background()
 	err = location_usecase.NewDeleteLocationUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {

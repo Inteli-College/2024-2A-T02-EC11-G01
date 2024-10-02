@@ -21,8 +21,6 @@ var setDBprovider = wire.NewSet(configs.SetupPostgres)
 
 var setRabbitProvider = wire.NewSet(configs.SetupRabbitMQChannel)
 
-var setEventDispatcher = wire.NewSet(events.NewEventDispatcher, wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
-
 var setEventDispatcherDependency = wire.NewSet(
 	events.NewEventDispatcher,
 	event.NewLocationCreated,
@@ -68,12 +66,6 @@ func NewRabbitChannel() (*amqp.Channel, error) {
 	return nil, nil
 }
 
-func NewEventDispatcher() (*events.EventDispatcher, error) {
-	wire.Build(setEventDispatcher)
-
-	return nil, nil
-}
-
 func NewLocationCreatedHandler() (*handler.LocationCreatedHandler, error) {
 	wire.Build(setRabbitProvider, handler.NewLocationCreatedHandler)
 
@@ -92,32 +84,29 @@ func NewRabbitMQConsumer() (*rabbitmq.RabbitMQConsumer, error) {
 	return nil, nil
 }
 
-func NewCreatePredictionUseCase() (*prediction_usecase.CreatePredictionUseCase, error) {
+func NewCreatePredictionUseCase(eventDispatcher events.EventDispatcherInterface) (*prediction_usecase.CreatePredictionUseCase, error) {
 	wire.Build(
 		setPredictionRepositoryDependency,
 		setPredictionCreatedEvent,
-		setEventDispatcher,
 		prediction_usecase.NewCreatePredictionUseCase,
 	)
 	return &prediction_usecase.CreatePredictionUseCase{}, nil
 }
 
-func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
+func NewPredicitonWebHandlers(eventDispatcher events.EventDispatcherInterface) (*PredictionWebHandlers, error) {
 	wire.Build(
 		setPredictionRepositoryDependency,
 		setPredictionCreatedEvent,
-		setEventDispatcher,
 		setPredictionWebHandlers,
 		wire.Struct(new(PredictionWebHandlers), "*"),
 	)
 	return nil, nil
 }
 
-func NewLocationWebHandlers() (*LocationWebHandlers, error) {
+func NewLocationWebHandlers(eventDispatcher events.EventDispatcherInterface) (*LocationWebHandlers, error) {
 	wire.Build(
 		setLocationRepositoryDependency,
 		setLocationCreatedEvent,
-		setEventDispatcher,
 		setLocationWebHandlers,
 		wire.Struct(new(LocationWebHandlers), "*"),
 	)

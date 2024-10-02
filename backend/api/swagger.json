@@ -402,10 +402,10 @@
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -422,10 +422,10 @@
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -448,10 +448,10 @@
         "location_usecase.UpdateLocationInputDTO": {
             "type": "object",
             "properties": {
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -468,10 +468,10 @@
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "latitude": {
                     "type": "string"
                 },
-                "latitude": {
+                "location_id": {
                     "type": "string"
                 },
                 "longitude": {
@@ -488,7 +488,7 @@
         "prediction_usecase.CreatePredictionInputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "detections": {
@@ -497,7 +497,7 @@
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -505,7 +505,7 @@
         "prediction_usecase.CreatePredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -514,13 +514,13 @@
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -528,7 +528,7 @@
         "prediction_usecase.FindPredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -537,13 +537,13 @@
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -554,19 +554,19 @@
         "prediction_usecase.UpdatePredictionInputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 }
             }
@@ -574,7 +574,7 @@
         "prediction_usecase.UpdatePredictionOutputDTO": {
             "type": "object",
             "properties": {
-                "annotated_image": {
+                "annotated_image_path": {
                     "type": "string"
                 },
                 "created_at": {
@@ -583,13 +583,13 @@
                 "detections": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "location_id": {
                     "type": "string"
                 },
-                "raw_image": {
+                "prediction_id": {
+                    "type": "string"
+                },
+                "raw_image_path": {
                     "type": "string"
                 },
                 "update_at": {

@@ -36,11 +36,11 @@ func (u *CreateLocationUseCase) Execute(ctx context.Context, input CreateLocatio
 	}
 
 	dto := &CreateLocationOutputDTO{
-		Id:        res.Id,
-		Name:      res.Name,
-		Latitude:  res.Latitude,
-		Longitude: res.Longitude,
-		CreatedAt: res.CreatedAt,
+		LocationId: res.LocationId,
+		Name:       res.Name,
+		Latitude:   res.Latitude,
+		Longitude:  res.Longitude,
+		CreatedAt:  res.CreatedAt,
 	}
 
 	u.LocationCreated.SetPayload(dto)

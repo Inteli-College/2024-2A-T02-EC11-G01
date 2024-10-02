@@ -55,7 +55,7 @@ func (r *LocationRepositoryGorm) FindAllLocations(ctx context.Context) ([]*entit
 
 func (r *LocationRepositoryGorm) UpdateLocation(ctx context.Context, input *entity.Location) (*entity.Location, error) {
 	var location entity.Location
-	err := r.Db.WithContext(ctx).First(&location, "id = ?", input.Id).Error
+	err := r.Db.WithContext(ctx).First(&location, "location_id = ?", input.LocationId).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, entity.ErrLocationNotFound
@@ -75,8 +75,8 @@ func (r *LocationRepositoryGorm) UpdateLocation(ctx context.Context, input *enti
 	return &location, nil
 }
 
-func (r *LocationRepositoryGorm) DeleteLocation(ctx context.Context, id uuid.UUID) error {
-	err := r.Db.WithContext(ctx).Delete(&entity.Location{}, "id = ?", id).Error
+func (r *LocationRepositoryGorm) DeleteLocation(ctx context.Context, locationId uuid.UUID) error {
+	err := r.Db.WithContext(ctx).Delete(&entity.Location{}, "location_id = ?", locationId).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return entity.ErrLocationNotFound

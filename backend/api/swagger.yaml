@@ -13,9 +13,9 @@ definitions:
     properties:
       created_at:
         type: string
-      id:
-        type: string
       latitude:
+        type: string
+      location_id:
         type: string
       longitude:
         type: string
@@ -26,9 +26,9 @@ definitions:
     properties:
       created_at:
         type: string
-      id:
-        type: string
       latitude:
+        type: string
+      location_id:
         type: string
       longitude:
         type: string
@@ -43,9 +43,9 @@ definitions:
     type: object
   location_usecase.UpdateLocationInputDTO:
     properties:
-      id:
-        type: string
       latitude:
+        type: string
+      location_id:
         type: string
       longitude:
         type: string
@@ -56,9 +56,9 @@ definitions:
     properties:
       created_at:
         type: string
-      id:
-        type: string
       latitude:
+        type: string
+      location_id:
         type: string
       longitude:
         type: string
@@ -69,73 +69,73 @@ definitions:
     type: object
   prediction_usecase.CreatePredictionInputDTO:
     properties:
-      annotated_image:
+      annotated_image_path:
         type: string
       detections:
         type: integer
       location_id:
         type: string
-      raw_image:
+      raw_image_path:
         type: string
     type: object
   prediction_usecase.CreatePredictionOutputDTO:
     properties:
-      annotated_image:
+      annotated_image_path:
         type: string
       created_at:
         type: string
       detections:
         type: integer
-      id:
-        type: string
       location_id:
         type: string
-      raw_image:
+      prediction_id:
+        type: string
+      raw_image_path:
         type: string
     type: object
   prediction_usecase.FindPredictionOutputDTO:
     properties:
-      annotated_image:
+      annotated_image_path:
         type: string
       created_at:
         type: string
       detections:
         type: integer
-      id:
-        type: string
       location_id:
         type: string
-      raw_image:
+      prediction_id:
+        type: string
+      raw_image_path:
         type: string
       updated_at:
         type: string
     type: object
   prediction_usecase.UpdatePredictionInputDTO:
     properties:
-      annotated_image:
+      annotated_image_path:
         type: string
       detections:
         type: integer
-      id:
-        type: string
       location_id:
         type: string
-      raw_image:
+      prediction_id:
+        type: string
+      raw_image_path:
         type: string
     type: object
   prediction_usecase.UpdatePredictionOutputDTO:
     properties:
-      annotated_image:
+      annotated_image_path:
         type: string
       created_at:
         type: string
       detections:
         type: integer
-      id:
-        type: string
       location_id:
         type: string
-      raw_image:
+      prediction_id:
+        type: string
+      raw_image_path:
         type: string
       update_at:
         type: string

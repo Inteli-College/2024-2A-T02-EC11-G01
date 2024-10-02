@@ -2,6 +2,7 @@ package prediction_usecase
 
 import (
 	"context"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 )
 
@@ -21,13 +22,13 @@ func (uc *FindAllPredictionsByLocationIdUseCase) Execute(ctx context.Context, in
 	output := make(FindAllPredictionsByLocationIdOutputDTO, len(res))
 	for i, prediction := range res {
 		output[i] = &FindPredictionOutputDTO{
-			Id:             prediction.Id,
-			RawImage:       prediction.RawImage,
-			AnnotatedImage: prediction.AnnotatedImage,
-			Detections:     prediction.Detections,
-			LocationId:     prediction.LocationId,
-			CreatedAt:      prediction.CreatedAt,
-			UpdatedAt:      prediction.UpdatedAt,
+			PredictionId:       prediction.PredictionId,
+			RawImagePath:       prediction.RawImagePath,
+			AnnotatedImagePath: prediction.AnnotatedImagePath,
+			Detections:         prediction.Detections,
+			LocationId:         prediction.LocationId,
+			CreatedAt:          prediction.CreatedAt,
+			UpdatedAt:          prediction.UpdatedAt,
 		}
 	}
 	return &output, nil

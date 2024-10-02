@@ -30,11 +30,6 @@ func NewRabbitChannel() (*amqp091.Channel, error) {
 	return channel, nil
 }
 
-func NewEventDispatcher() (*events.EventDispatcher, error) {
-	eventDispatcher := events.NewEventDispatcher()
-	return eventDispatcher, nil
-}
-
 func NewLocationCreatedHandler() (*handler.LocationCreatedHandler, error) {
 	channel, err := configs.SetupRabbitMQChannel()
 	if err != nil {
@@ -62,20 +57,18 @@ func NewRabbitMQConsumer() (*rabbitmq.RabbitMQConsumer, error) {
 	return rabbitMQConsumer, nil
 }
 
-func NewCreatePredictionUseCase() (*prediction_usecase.CreatePredictionUseCase, error) {
+func NewCreatePredictionUseCase(eventDispatcher events.EventDispatcherInterface) (*prediction_usecase.CreatePredictionUseCase, error) {
 	predictionCreated := event.NewPredictionCreated()
 	db, err := configs.SetupPostgres()
 	if err != nil {
 		return nil, err
 	}
 	predictionRepositoryGorm := repository.NewPredictionRepositoryGorm(db)
-	eventDispatcher := events.NewEventDispatcher()
 	createPredictionUseCase := prediction_usecase.NewCreatePredictionUseCase(predictionCreated, predictionRepositoryGorm, eventDispatcher)
 	return createPredictionUseCase, nil
 }
 
-func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
-	eventDispatcher := events.NewEventDispatcher()
+func NewPredicitonWebHandlers(eventDispatcher events.EventDispatcherInterface) (*PredictionWebHandlers, error) {
 	db, err := configs.SetupPostgres()
 	if err != nil {
 		return nil, err
@@ -89,8 +82,7 @@ func NewPredicitonWebHandlers() (*PredictionWebHandlers, error) {
 	return predictionWebHandlers, nil
 }
 
-func NewLocationWebHandlers() (*LocationWebHandlers, error) {
-	eventDispatcher := events.NewEventDispatcher()
+func NewLocationWebHandlers(eventDispatcher events.EventDispatcherInterface) (*LocationWebHandlers, error) {
 	db, err := configs.SetupPostgres()
 	if err != nil {
 		return nil, err
@@ -109,8 +101,6 @@ func NewLocationWebHandlers() (*LocationWebHandlers, error) {
 var setDBprovider = wire.NewSet(configs.SetupPostgres)
 
 var setRabbitProvider = wire.NewSet(configs.SetupRabbitMQChannel)
-
-var setEventDispatcher = wire.NewSet(events.NewEventDispatcher, wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
 
 var setEventDispatcherDependency = wire.NewSet(events.NewEventDispatcher, event.NewLocationCreated, event.NewPredictionCreated, wire.Bind(new(events.EventInterface), new(*event.LocationCreated)), wire.Bind(new(events.EventInterface), new(*event.PredictionCreated)), wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
 

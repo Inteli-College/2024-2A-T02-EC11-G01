@@ -9,6 +9,7 @@ import (
 	appSwagDocs "github.com/Inteli-College/2024-2A-T02-EC11-G01/api"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/rabbitmq"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/prediction_usecase"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/penglongli/gin-metrics/ginmetrics"
@@ -34,38 +35,33 @@ import (
 func main() {
 	/////////////////////// Event Dispatcher /////////////////////////
 
-	eventDispatcher, err := NewEventDispatcher()
-	if err != nil {
-		panic(err)
-	}
+	eventDispatcher := events.NewEventDispatcher()
 
 	locationCreatedHandler, err := NewLocationCreatedHandler()
 	if err != nil {
 		panic(err)
 	}
-
 	eventDispatcher.Register("LocationCreated", locationCreatedHandler)
 
-	predicitonCreatedHandler, err := NewPredictionCreatedHandler()
+	predictionCreatedHandler, err := NewPredictionCreatedHandler()
 	if err != nil {
 		panic(err)
 	}
-
-	eventDispatcher.Register("PredictionCreated", predicitonCreatedHandler)
+	eventDispatcher.Register("PredictionCreated", predictionCreatedHandler)
 
 	/////////////////////// Use Cases /////////////////////////
-	pu, err := NewCreatePredictionUseCase()
+	pu, err := NewCreatePredictionUseCase(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}
 
 	/////////////////////// Web Handlers /////////////////////////
-	lh, err := NewLocationWebHandlers()
+	lh, err := NewLocationWebHandlers(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}
 
-	ph, err := NewPredicitonWebHandlers()
+	ph, err := NewPredicitonWebHandlers(eventDispatcher)
 	if err != nil {
 		panic(err)
 	}

@@ -17,5 +17,5 @@ func NewDeletePredictionUseCase(predictionRepository entity.PredictionRepository
 }
 
 func (u *DeletePredictionUseCase) Execute(ctx context.Context, input DeletePredictionInputDTO) error {
-	return u.PredictionRepository.DeletePrediction(ctx, input.Id)
+	return u.PredictionRepository.DeletePrediction(ctx, input.PredictionId)
 }

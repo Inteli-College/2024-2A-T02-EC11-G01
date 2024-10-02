@@ -23,23 +23,23 @@ type PredictionRepository interface {
 }
 
 type Prediction struct {
-	Id             uuid.UUID `json:"id,omitempty" gorm:"primarykey;type:uuid"`
-	RawImage       string    `json:"raw_image,omitempty" gorm:"type:text"`
-	AnnotatedImage string    `json:"annotated_image,omitempty" gorm:"type:text"`
-	Detections     uint      `json:"detections,omitempty" gorm:"type:integer"`
-	LocationId     uuid.UUID `json:"location_id,omitempty" gorm:"type:uuid;not null"`
-	CreatedAt      time.Time `json:"created_at,omitempty" gorm:"type:timestamp"`
-	UpdatedAt      time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
+	PredictionId       uuid.UUID `json:"prediction_id,omitempty" gorm:"primarykey;type:uuid"`
+	RawImagePath       string    `json:"raw_image_path,omitempty" gorm:"type:text"`
+	AnnotatedImagePath string    `json:"annotated_image_path,omitempty" gorm:"type:text"`
+	Detections         uint      `json:"detections,omitempty" gorm:"type:integer"`
+	LocationId         uuid.UUID `json:"location_id,omitempty" gorm:"type:uuid;not null"`
+	CreatedAt          time.Time `json:"created_at,omitempty" gorm:"type:timestamp"`
+	UpdatedAt          time.Time `json:"updated_at,omitempty" gorm:"type:timestamp"`
 }
 
 func NewPrediction(rawImage string, annotatedImage string, detections uint, locationId uuid.UUID) (*Prediction, error) {
 	prediciton := &Prediction{
-		Id:             uuid.New(),
-		RawImage:       rawImage,
-		AnnotatedImage: annotatedImage,
-		Detections:     detections,
-		LocationId:     locationId,
-		CreatedAt:      time.Now(),
+		PredictionId:       uuid.New(),
+		RawImagePath:       rawImage,
+		AnnotatedImagePath: annotatedImage,
+		Detections:         detections,
+		LocationId:         locationId,
+		CreatedAt:          time.Now(),
 	}
 	if err := prediciton.Validate(); err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewPrediction(rawImage string, annotatedImage string, detections uint, loca
 }
 
 func (p *Prediction) Validate() error {
-	if p.Id == uuid.Nil || p.RawImage == "" || p.AnnotatedImage == "" || p.LocationId == uuid.Nil || p.CreatedAt.IsZero() {
+	if p.PredictionId == uuid.Nil || p.RawImagePath == "" || p.AnnotatedImagePath == "" || p.LocationId == uuid.Nil || p.CreatedAt.IsZero() {
 		return ErrInvalidPrediction
 	}
 	return nil

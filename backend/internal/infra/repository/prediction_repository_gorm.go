@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 
+	"strconv"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/google/uuid"
-	"strconv"
 	"gorm.io/gorm"
 )
 
@@ -67,7 +68,7 @@ func (r *PredictionRepositoryGorm) FindAllPredictions(ctx context.Context) ([]*e
 
 func (r *PredictionRepositoryGorm) UpdatePrediction(ctx context.Context, input *entity.Prediction) (*entity.Prediction, error) {
 	var prediction entity.Prediction
-	err := r.Db.WithContext(ctx).First(&prediction, "id = ?", input.Id).Error
+	err := r.Db.WithContext(ctx).First(&prediction, "prediction_id = ?", input.PredictionId).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, entity.ErrPredictionNotFound
@@ -75,8 +76,8 @@ func (r *PredictionRepositoryGorm) UpdatePrediction(ctx context.Context, input *
 		return nil, err
 	}
 
-	prediction.RawImage = input.RawImage
-	prediction.AnnotatedImage = input.AnnotatedImage
+	prediction.RawImagePath = input.RawImagePath
+	prediction.AnnotatedImagePath = input.AnnotatedImagePath
 	prediction.Detections = input.Detections
 	prediction.LocationId = input.LocationId
 	prediction.UpdatedAt = input.UpdatedAt
@@ -88,8 +89,8 @@ func (r *PredictionRepositoryGorm) UpdatePrediction(ctx context.Context, input *
 	return &prediction, nil
 }
 
-func (r *PredictionRepositoryGorm) DeletePrediction(ctx context.Context, id uuid.UUID) error {
-	err := r.Db.WithContext(ctx).Delete(&entity.Prediction{}, "id = ?", id).Error
+func (r *PredictionRepositoryGorm) DeletePrediction(ctx context.Context, predictionId uuid.UUID) error {
+	err := r.Db.WithContext(ctx).Delete(&entity.Prediction{}, "prediction_id = ?", predictionId).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return entity.ErrPredictionNotFound
@@ -108,8 +109,8 @@ func (r *PredictionRepositoryGorm) pagination(ctx context.Context, tx *gorm.DB) 
 	if err != nil {
 		return nil, err
 	}
-	tx.Order("created_at DESC");
-	tx.Limit(limit);
-	tx.Offset(offset);
+	tx.Order("created_at DESC")
+	tx.Limit(limit)
+	tx.Offset(offset)
 	return tx, nil
 }

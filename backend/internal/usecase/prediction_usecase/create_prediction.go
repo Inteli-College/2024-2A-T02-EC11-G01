@@ -2,6 +2,8 @@ package prediction_usecase
 
 import (
 	"context"
+	"log"
+
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 )
@@ -25,7 +27,7 @@ func NewCreatePredictionUseCase(
 }
 
 func (u *CreatePredictionUseCase) Execute(ctx context.Context, input CreatePredictionInputDTO) (*CreatePredictionOutputDTO, error) {
-	prediction, err := entity.NewPrediction(input.RawImage, input.AnnotatedImage, input.Detections, input.LocationId)
+	prediction, err := entity.NewPrediction(input.RawImagePath, input.AnnotatedImagePath, input.Detections, input.LocationId)
 	if err != nil {
 		return nil, err
 	}
@@ -34,13 +36,15 @@ func (u *CreatePredictionUseCase) Execute(ctx context.Context, input CreatePredi
 		return nil, err
 	}
 	dto := &CreatePredictionOutputDTO{
-		Id:             res.Id,
-		RawImage:       res.RawImage,
-		AnnotatedImage: res.AnnotatedImage,
-		Detections:     res.Detections,
-		LocationId:     res.LocationId,
-		CreatedAt:      res.CreatedAt,
+		PredictionId:       res.PredictionId,
+		RawImagePath:       res.RawImagePath,
+		AnnotatedImagePath: res.AnnotatedImagePath,
+		Detections:         res.Detections,
+		LocationId:         res.LocationId,
+		CreatedAt:          res.CreatedAt,
 	}
+
+	log.Printf("Prediction createddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
 
 	u.PredictionCreated.SetPayload(dto)
 	u.EventDispatcher.Dispatch(u.PredictionCreated)
