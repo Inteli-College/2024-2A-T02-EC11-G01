@@ -27,9 +27,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Build and push app image
         uses: docker/build-push-action@v6
         with:
@@ -68,4 +65,4 @@ jobs:
           context: ./infraestructure/rabbitmq
           push: true
           tags: |
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/carbonicos/rabbitmq:latest
+            carbonicos/rabbitmq:latest
