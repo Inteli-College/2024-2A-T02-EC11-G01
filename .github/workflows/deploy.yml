@@ -57,3 +57,50 @@ jobs:
               docker push carbonicos/rabbitmq:latest
               ;;
           esac
+  final_step:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_PEM }}
+
+      - name: Run docker-compose inside EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ubuntu
+        run: |
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+            cd ~/2024-2A-T02-EC11-G01
+            git checkout main
+            git pull
+            echo "Stopping and removing old containers"
+            docker compose down
+            echo "Pulling latest images"
+            docker compose pull
+            echo "Starting containers with latest images"
+            docker compose up -d
+
+            COMPOSE_UP_EXIT_CODE=$?
+            if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
+                echo "docker compose up failed"
+                exit 1
+            fi
+
+            sleep 10  # Aguardar alguns segundos para garantir que os serviços estejam iniciados
+            # Verificar o status dos containers
+            STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
+            if [ -n "$STATUS" ]; then
+                echo "One or more services are not running correctly"
+                exit 1
+            fi
+            # Verificar logs dos containers para mensagens de erro (opcional)
+            LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
+            if [ -n "$LOGS" ]; then
+                echo "Error found in container logs"
+                echo "$LOGS"
+                exit 1
+            fi
+          EOF
+        
