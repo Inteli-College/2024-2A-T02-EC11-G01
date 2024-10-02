@@ -20,8 +20,8 @@ model locations {
 model predictions {
   prediction_id     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   raw_image_path    String
-  output_image_path String?
-  output            Json?
+  annotated_image_path String?
+  detections            BigInt?
   location_id       String    @db.Uuid
   locations         locations @relation(fields: [location_id], references: [location_id])
   created_at        DateTime  @default(dbgenerated("now()"))
