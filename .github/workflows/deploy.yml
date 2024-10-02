@@ -3,7 +3,7 @@ name: Build and Push Docker Images to DockerHub
 on:
   push:
     branches:
-      - feat/github-workflow
+      - main
   workflow_dispatch:
 
 jobs:
@@ -85,7 +85,7 @@ jobs:
             docker pull carbonicos/predictor:latest &
             docker pull carbonicos/migrations:latest &
             docker pull carbonicos/rabbitmq:latest &
-            wait  # Espera todos os pulls terminarem
+            wait  # Wait for all images to be pulled
 
             echo "Starting containers"
             docker run -d --name app carbonicos/app:latest &
@@ -93,9 +93,9 @@ jobs:
             docker run -d --name predictor carbonicos/predictor:latest &
             docker run -d --name migrations carbonicos/migrations:latest &
             docker run -d --name rabbitmq carbonicos/rabbitmq:latest &
-            wait  # Espera todos os containers iniciarem
+            wait  # Wait for all containers to be started
 
-            sleep 10  # Aguarda alguns segundos para garantir que os serviços estejam iniciados
+            sleep 10  # Wait for services to start
             echo "Checking container statuses"
             STATUS=$(docker ps | grep -E "Exit|Restarting" || true)
             if [ -n "$STATUS" ]; then
