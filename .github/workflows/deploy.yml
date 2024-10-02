@@ -66,7 +66,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_PEM }}
 
-      - name: Run docker-compose inside EC2
+      - name: Run docker commands inside EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ubuntu
@@ -76,27 +76,40 @@ jobs:
             git checkout main
             git pull
             echo "Stopping and removing old containers"
-            docker compose down
+            docker stop $(docker ps -q) || true
+            docker rm $(docker ps -a -q) || true
+
             echo "Pulling latest images"
-            docker compose pull
-            echo "Starting containers with latest images"
-            docker compose up -d
+            docker pull carbonicos/app:latest &
+            docker pull carbonicos/prover:latest &
+            docker pull carbonicos/predictor:latest &
+            docker pull carbonicos/migrations:latest &
+            docker pull carbonicos/rabbitmq:latest &
+            wait  # Espera todos os pulls terminarem
 
-            COMPOSE_UP_EXIT_CODE=$?
-            if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
-                echo "docker compose up failed"
-                exit 1
-            fi
+            echo "Starting containers"
+            docker run -d --name app carbonicos/app:latest &
+            docker run -d --name prover carbonicos/prover:latest &
+            docker run -d --name predictor carbonicos/predictor:latest &
+            docker run -d --name migrations carbonicos/migrations:latest &
+            docker run -d --name rabbitmq carbonicos/rabbitmq:latest &
+            wait  # Espera todos os containers iniciarem
 
-            sleep 10  # Aguardar alguns segundos para garantir que os serviços estejam iniciados
-            # Verificar o status dos containers
-            STATUS=$(docker compose ps | grep -E "Exit|Restarting" || true)
+            sleep 10  # Aguarda alguns segundos para garantir que os serviços estejam iniciados
+            echo "Checking container statuses"
+            STATUS=$(docker ps | grep -E "Exit|Restarting" || true)
             if [ -n "$STATUS" ]; then
                 echo "One or more services are not running correctly"
                 exit 1
             fi
-            # Verificar logs dos containers para mensagens de erro (opcional)
-            LOGS=$(docker compose logs 2>&1 | grep -i "error" || true)
+
+            echo "Checking for errors in logs"
+            LOGS=$(docker logs app 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs prover 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs predictor 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs migrations 2>&1 | grep -i "error" || true)
+            LOGS+=$(docker logs rabbitmq 2>&1 | grep -i "error" || true)
+
             if [ -n "$LOGS" ]; then
                 echo "Error found in container logs"
                 echo "$LOGS"
