@@ -12,41 +12,60 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         id: setup_buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to ECR
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        env:
-          AWS_ACCOUNT_IDS: ${{ secrets.AWS_ACCOUNT_ID }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Compose images
-        run: |
-          docker compose -f docker-compose.yml build
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Tag and Push Docker images to ECR
-        run: |
-          IMAGE_TAG=latest
-          REPOSITORY_URL=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/carbonicos
-          
-          docker compose -f docker-compose.yml config | grep image | awk '{print $2}' | while read image_name; do
-            image_base=$(basename $image_name)
-            docker tag $image_name $REPOSITORY_URL:$IMAGE_TAG
-            docker push $REPOSITORY_URL:$IMAGE_TAG
-          done
+      - name: Build and push app image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            carbonicos/app:latest
+
+      - name: Build and push prover image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            carbonicos/prover:latest
+
+      - name: Build and push predictor image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./predictor
+          push: true
+          tags: |
+            carbonicos/predictor:latest
+
+      - name: Build and push migrations image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./infraestructure/database
+          push: true
+          tags: |
+            carbonicos/migrations:latest
+
+      - name: Build and push rabbitmq image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./infraestructure/rabbitmq
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/carbonicos/rabbitmq:latest

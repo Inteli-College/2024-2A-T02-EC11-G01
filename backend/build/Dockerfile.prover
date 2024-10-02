@@ -32,7 +32,7 @@ RUN --mount=type=bind,source=./cmd/prover/lib/src,target=src \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
-    cargo build --locked --release && \
+    cargo build --release && \
     cp target/release/lib${APP_NAME}.a /usr/lib
 
 ################################################################################
