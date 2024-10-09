@@ -1,6 +1,5 @@
 import streamlit as st
 from components.sidebar import render_sidebar
-from components.metrics import render_metrics
 from components.dashboard import render_dashboard
 
 st.set_page_config(page_title="Visão Geral", layout="wide")
@@ -12,7 +11,5 @@ render_sidebar()
 
 st.markdown("<h1 class='header'>Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("<h6 style='color: #black;'>Visão geral - Métricas</h6>", unsafe_allow_html=True)
-
-render_metrics()
 
 render_dashboard()
