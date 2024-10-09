@@ -3,17 +3,17 @@ import plotly.express as px
 import pandas as pd
 
 def render_dashboard():
-    st.markdown("<h4 style='color: #4CAF50;'>Quantidade de Carbono Capturado</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #4CAF50; margin-top: 35px;' >Quantidade de Carbono Capturado</h4>", unsafe_allow_html=True)
     
     col3, col4 = st.columns([2, 3], gap="large")
     
     with col3:
-        st.metric("Quantidade de Carbono capturado", "2.568 toneladas", "-2.1% vs última semana")
+        st.metric("Quantidade de Carbono capturado", "568 toneladas", "+2.1% vs última semana")
     
     with col4:
         linha_data = pd.DataFrame({
-            'Dias': ['1', '2', '3', '4', '5', '6', '7'],
-            'Carbono': [1, 2, 3, 4, 5, 6, 7]
+            'Dias': ['1', '2', '3', '4', '5'],
+            'Carbono': [128, 245 , 230, 323, 568]
         })
         fig_line = px.line(linha_data, x='Dias', y='Carbono', title="Histórico de Carbono Capturado",
                            line_shape='linear', color_discrete_sequence=['#388E3C'])
