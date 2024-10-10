@@ -2,48 +2,34 @@ package prediction_usecase
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
-	"github.com/google/uuid"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 )
 
-type FindAllPredictionsByLocationIdUsecase struct {
-	PredictionRepository *repository.PredictionRepositoryGorm
+type FindAllPredictionsByLocationIdUseCase struct {
+	PredictionRepository entity.PredictionRepository
 }
 
-func NewFindAllPredictionsByLocationIdUsecase(predictionRepository *repository.PredictionRepositoryGorm) *FindAllPredictionsByLocationIdUsecase {
-	return &FindAllPredictionsByLocationIdUsecase{PredictionRepository: predictionRepository}
+func NewFindAllPredictionsByLocationIdUseCase(predictionRepository entity.PredictionRepository) *FindAllPredictionsByLocationIdUseCase {
+	return &FindAllPredictionsByLocationIdUseCase{PredictionRepository: predictionRepository}
 }
 
-func (uc *FindAllPredictionsByLocationIdUsecase) Execute(ctx context.Context, input *dto.FindPredictionByLocationIdInputDTO, limit *int, offset *int) ([]*dto.PredictionDTO, error) {
-	locationUUID, errUUID := uuid.Parse(input.LocationId)
-	if errUUID != nil {
-		return nil, errUUID
-	}
-
-	predictions, err := uc.PredictionRepository.FindAllPredictionsByLocationID(ctx, &locationUUID, limit, offset)
+func (uc *FindAllPredictionsByLocationIdUseCase) Execute(ctx context.Context, input FindAllPredictionsByLocationIdInputDTO) (*FindAllPredictionsByLocationIdOutputDTO, error) {
+	res, err := uc.PredictionRepository.FindAllPredictionsByLocationId(ctx, input.LocationId)
 	if err != nil {
 		return nil, err
 	}
-
-	output := make(dto.FindAllPredictionsOutputDTO, len(predictions))
-	for i, prediction := range predictions {
-		var detections map[string]interface{}
-		jsonErr := json.Unmarshal(prediction.Output, &detections)
-		if jsonErr != nil {
-			return nil, jsonErr
-		}
-		output[i] = &dto.PredictionDTO{
-			PredictionId:    prediction.PredictionId.String(),
-			RawImagePath:    prediction.RawImagePath,
-			OutputImagePath: prediction.OutputImagePath,
-			Output:          detections,
-			LocationId:      prediction.LocationId.String(),
-			CreatedAt:       prediction.CreatedAt,
+	output := make(FindAllPredictionsByLocationIdOutputDTO, len(res))
+	for i, prediction := range res {
+		output[i] = &FindPredictionOutputDTO{
+			PredictionId:       prediction.PredictionId,
+			RawImagePath:       prediction.RawImagePath,
+			AnnotatedImagePath: prediction.AnnotatedImagePath,
+			Detections:         prediction.Detections,
+			LocationId:         prediction.LocationId,
+			CreatedAt:          prediction.CreatedAt,
+			UpdatedAt:          prediction.UpdatedAt,
 		}
 	}
-
-	return output, nil
+	return &output, nil
 }

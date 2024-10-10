@@ -1,11 +1,18 @@
+volumes:
+  postgres_data:
+  grafana_data:
+
 services:
   app:
+    profiles:
+      - prod
+    container_name: app
     hostname: app
     restart: always
     ports:
-      - "8080:8080"
+      - "8081:8081"
     env_file:
-      - ./backend/.env
+      - ./.env
     build:
       context: ./backend
       dockerfile: build/Dockerfile.app
@@ -13,36 +20,112 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  prover:
+    profiles:
+      - prod
+    container_name: prover
+    hostname: prover
+    restart: always
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./.env
+    build:
+      context: ./backend
+      dockerfile: build/Dockerfile.prover
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  predictor:
+    profiles:
+      - prod
+    container_name: predictor
+    hostname: predictor
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "8083:8000"
+    env_file:
+      - ./.env
+    build:
+      context: ./predictor
+      dockerfile: Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   postgres:
-    image: postgres:13
-    container_name: postgres
+    image: postgres
+    hostname: postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: db
+    expose:
+      - "5432:5432"
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # migrations:
-  #   build:
-  #     context: ./infra/database
-  #     dockerfile: Dockerfile
-  #   container_name: migrations
-  #   environment:
-  #     - DATABASE_URL=postgresql://user:password@postgres:5432/db
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - app-network
+  migrations:
+    profiles:
+      - prod
+    build:
+      context: ./infraestructure/database
+      dockerfile: Dockerfile
+    container_name: migrations
+    env_file:
+      - ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    profiles:
+      - prod
+    container_name: prometheus-service
+    image: prom/prometheus
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./infraestructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    profiles:
+      - prod
+    container_name: grafana
+    image: grafana/grafana-oss:latest
+    user: "0"
+    environment:
+      GF_PATHS_CONFIG: /etc/grafana/grafana_settings.ini
+    ports:
+      - "3000:3000"
+    restart: always
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infraestructure/grafana/grafana_settings.ini:/etc/grafana/grafana_settings.ini
 
   rabbitmq:
+    profiles:
+      - prod
     container_name: rabbitmq
     build: ./infraestructure/rabbitmq
     ports:
-      - "15672:15672"
       - "5672:5672"
+      - "15672:15672"
     expose:
       - "5672"
     healthcheck:
@@ -51,16 +134,3 @@ services:
       timeout: 2s
       retries: 20
     restart: always
-
-  predictor:
-    build:
-      context: ./predictor
-      dockerfile: Dockerfile
-    container_name: predictor
-    ports:
-      - "8000:8000"
-    depends_on:
-      - rabbitmq
-
-volumes:
-  postgres_data:

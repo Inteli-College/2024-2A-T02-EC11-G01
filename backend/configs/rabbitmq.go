@@ -9,9 +9,9 @@ import (
 )
 
 func setupRabbitMQChannel() (*amqp.Channel, error) {
-	rabbitMQChannel, isSet := os.LookupEnv("RABBITMQ_CHANNEL")
+	rabbitMQChannel, isSet := os.LookupEnv("RABBITMQ_URL")
 	if !isSet {
-		log.Fatalf("RABBITMQ_CHANNEL is not set")
+		log.Fatalf("RABBITMQ_URL is not set")
 	}
 
 	conn, err := amqp.Dial(rabbitMQChannel)

@@ -29,11 +29,14 @@ func (h *PredictionCreatedHandler) Handle(event events.EventInterface, wg *sync.
 		Body:        jsonOutput,
 	}
 
-	h.RabbitMQChannel.Publish(
-		"amq.direct",         // exchange
-		"prediciton.created", // key name
+	err := h.RabbitMQChannel.Publish(
+		"",                   // exchange
+		"prediction.created", // key name
 		false,                // mandatory
 		false,                // immediate
 		msg,                  // message to publish
 	)
+	if err != nil {
+		panic(err)
+	}
 }

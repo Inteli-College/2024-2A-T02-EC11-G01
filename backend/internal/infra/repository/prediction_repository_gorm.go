@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"errors"
+
+	"strconv"
 
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/google/uuid"
@@ -10,88 +11,106 @@ import (
 )
 
 type PredictionRepositoryGorm struct {
-	db *gorm.DB
+	Db *gorm.DB
 }
 
 func NewPredictionRepositoryGorm(db *gorm.DB) *PredictionRepositoryGorm {
 	return &PredictionRepositoryGorm{
-		db: db,
+		Db: db,
 	}
 }
 
 func (r *PredictionRepositoryGorm) CreatePrediction(ctx context.Context, input *entity.Prediction) (*entity.Prediction, error) {
-	if err := r.db.WithContext(ctx).Create(input).Error; err != nil {
+	err := r.Db.WithContext(ctx).Create(&input).Error
+	if err != nil {
 		return nil, err
 	}
-
 	return input, nil
 }
 
-func (r *PredictionRepositoryGorm) FindPredictionById(ctx context.Context, id *uuid.UUID) (*entity.Prediction, error) {
+func (r *PredictionRepositoryGorm) FindPredictionById(ctx context.Context, id uuid.UUID) (*entity.Prediction, error) {
 	var prediction entity.Prediction
-
-	if err := r.db.WithContext(ctx).First(&prediction, "prediction_id = ?", *id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err // TODO: return personalized errors
+	err := r.Db.WithContext(ctx).First(&prediction, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, entity.ErrPredictionNotFound
 		}
 		return nil, err
 	}
-
 	return &prediction, nil
 }
 
-func (r *PredictionRepositoryGorm) FindAllPredictionsByLocationID(ctx context.Context, locationID *uuid.UUID, limit *int, offset *int, orders ...string) ([]*entity.Prediction, error) {
+func (r *PredictionRepositoryGorm) FindAllPredictionsByLocationId(ctx context.Context, id uuid.UUID) ([]*entity.Prediction, error) {
 	var predictions []*entity.Prediction
-	query := r.db.WithContext(ctx)
-
-	query = r.addOrderToQuery(query, orders)
-	query = r.addLimitToQuery(query, limit)
-	query = r.addOffsetToQuery(query, offset)
-
-	if err := query.Where("location_id = ?", *locationID).Find(&predictions).Error; err != nil {
-		return nil, err // TODO: return personalized errors
+	r.pagination(ctx, r.Db)
+	err := r.Db.WithContext(ctx).Where("location_id = ?", id).Find(&predictions).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, entity.ErrPredictionNotFound
+		}
+		return nil, err
 	}
-
 	return predictions, nil
 }
 
-func (r *PredictionRepositoryGorm) FindAllPredictions(ctx context.Context, limit *int, offset *int, orders ...string) ([]*entity.Prediction, error) {
+func (r *PredictionRepositoryGorm) FindAllPredictions(ctx context.Context) ([]*entity.Prediction, error) {
 	var predictions []*entity.Prediction
-	query := r.db.WithContext(ctx)
+	r.pagination(ctx, r.Db)
+	err := r.Db.WithContext(ctx).Find(&predictions).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, entity.ErrPredictionNotFound
+		}
+		return nil, err
+	}
+	return predictions, nil
+}
 
-	query = r.addOrderToQuery(query, orders)
-	query = r.addLimitToQuery(query, limit)
-	query = r.addOffsetToQuery(query, offset)
-
-	if err := query.Find(&predictions).Error; err != nil {
+func (r *PredictionRepositoryGorm) UpdatePrediction(ctx context.Context, input *entity.Prediction) (*entity.Prediction, error) {
+	var prediction entity.Prediction
+	err := r.Db.WithContext(ctx).First(&prediction, "prediction_id = ?", input.PredictionId).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, entity.ErrPredictionNotFound
+		}
 		return nil, err
 	}
 
-	return predictions, nil
+	prediction.RawImagePath = input.RawImagePath
+	prediction.AnnotatedImagePath = input.AnnotatedImagePath
+	prediction.Detections = input.Detections
+	prediction.LocationId = input.LocationId
+	prediction.UpdatedAt = input.UpdatedAt
+
+	res := r.Db.WithContext(ctx).Save(prediction)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return &prediction, nil
 }
 
-func (r *PredictionRepositoryGorm) addOrderToQuery(query *gorm.DB, orders []string) *gorm.DB {
-	if orders != nil && len(orders) > 0 {
-		for _, order := range orders {
-			query = query.Order(order)
+func (r *PredictionRepositoryGorm) DeletePrediction(ctx context.Context, predictionId uuid.UUID) error {
+	err := r.Db.WithContext(ctx).Delete(&entity.Prediction{}, "prediction_id = ?", predictionId).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return entity.ErrPredictionNotFound
 		}
-		return query
+		return err
 	}
-	return query.Order("created_at DESC")
+	return nil
 }
 
-func (r *PredictionRepositoryGorm) addLimitToQuery(query *gorm.DB, limit *int) *gorm.DB {
-	if limit != nil {
-		return query.Limit(*limit)
+func (r *PredictionRepositoryGorm) pagination(ctx context.Context, tx *gorm.DB) (*gorm.DB, error) {
+	limit, err := strconv.Atoi(ctx.Value("limit").(string))
+	if err != nil {
+		return nil, err
 	}
-
-	return query
-}
-
-func (r *PredictionRepositoryGorm) addOffsetToQuery(query *gorm.DB, offset *int) *gorm.DB {
-	if offset != nil {
-		return query.Offset(*offset)
+	offset, err := strconv.Atoi(ctx.Value("offset").(string))
+	if err != nil {
+		return nil, err
 	}
-
-	return query
+	tx.Order("created_at DESC")
+	tx.Limit(limit)
+	tx.Offset(offset)
+	return tx, nil
 }

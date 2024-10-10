@@ -4,162 +4,158 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/infra/repository"
-	usecase "github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/location_usecase"
+	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/usecase/location_usecase"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-type LocationHandler struct {
-	createLocationUseCase   *usecase.CreateLocationUseCase
-	findLocationByIdUseCase *usecase.FindLocationByIdUsecase
-	updateLocationUseCase   *usecase.UpdateLocationUseCase
-	deleteLocationUseCase   *usecase.DeleteLocationUseCase
-	findAllLocationsUseCase *usecase.FindAllLocationsUseCase
+type LocationHandlers struct {
+	EventDispatcher      events.EventDispatcherInterface
+	LocationRepository   entity.LocationRepository
+	LocationCreatedEvent events.EventInterface
 }
 
-func NewLocationHandler(locationRepo *repository.LocationRepositoryGorm, eventDispatcher events.EventDispatcherInterface,
-	locationRepository entity.LocationRepository, locationCreatedEvent events.EventInterface) *LocationHandler {
-	handler := &LocationHandler{
-		createLocationUseCase:   usecase.NewCreateLocationUseCase(locationCreatedEvent, locationRepo, eventDispatcher),
-		findLocationByIdUseCase: usecase.NewFindLocationByIdUseCase(locationRepo),
-		updateLocationUseCase:   usecase.NewUpdateLocationUseCase(locationRepo),
-		deleteLocationUseCase:   usecase.NewDeleteLocationUseCase(locationRepo),
-		findAllLocationsUseCase: usecase.NewFindAllLocationsUseCase(locationRepo),
+func NewLocationHandlers(
+	eventDispatcher events.EventDispatcherInterface,
+	locationRepository entity.LocationRepository,
+	locationCreatedEvent events.EventInterface,
+) *LocationHandlers {
+	return &LocationHandlers{
+		EventDispatcher:      eventDispatcher,
+		LocationRepository:   locationRepository,
+		LocationCreatedEvent: locationCreatedEvent,
 	}
-	return handler
 }
 
-// CreateLocation godoc
-// @Summary Create a new location
-// @Description Create a new location
-// @Tags locations
+// CreateLocationHandler
+// @Summary Create a new Location
+// @Description Create a new Location in the system
+// @Tags Locations
 // @Accept json
 // @Produce json
-// @Param location body dto.CreateLocationInputDTO true "Create Location Input"
-// @Success 201 {object} dto.LocationOutputDTO
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /locations [post]
-func (h *LocationHandler) CreateLocation(c *gin.Context) {
-	var input dto.CreateLocationInputDTO
-	if err := c.ShouldBindJSON(&input); err != nil {
+// @Param input body location_usecase.CreateLocationInputDTO true "Location entity to create"
+// @Success 200 {object} location_usecase.CreateLocationOutputDTO
+// @Router /location [post]
+func (h *LocationHandlers) CreateLocationHandler(c *gin.Context) {
+	var input location_usecase.CreateLocationInputDTO
+	ctx := context.Background()
+	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	ctx := context.Background()
-	location, err := h.createLocationUseCase.Execute(ctx, &input)
+	res, err := location_usecase.NewCreateLocationUseCase(
+		h.LocationCreatedEvent,
+		h.LocationRepository,
+		h.EventDispatcher,
+	).Execute(ctx, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusCreated, location)
+	c.JSON(http.StatusOK, res)
 }
 
-// FindAllLocations godoc
-// @Summary Get all locations
-// @Description Get a list of all locations
-// @Tags locations
+// FindLocationByIdHandler
+// @Summary Retrieve a Location by ID
+// @Description Get details of a specific Location by its ID
+// @Tags Locations
 // @Accept json
 // @Produce json
-// @Success 200 {array} dto.LocationOutputDTO
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /locations [get]
-func (h *LocationHandler) FindAllLocations(c *gin.Context) {
+// @Param location_id path string true "Location ID"
+// @Success 200 {object} location_usecase.FindLocationOutputDTO
+// @Router /location/{location_id} [get]
+func (h *LocationHandlers) FindLocationByIdHandler(c *gin.Context) {
+	var input location_usecase.FindLocationByIdInputDTO
+	locationId, err := uuid.Parse(c.Param("location_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	input.LocationId = locationId
+
 	ctx := context.Background()
-	locations, err := h.findAllLocationsUseCase.Execute(ctx)
+	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
+	ctx = context.WithValue(ctx, "offset", c.DefaultQuery("offset", "0"))
+	res, err := location_usecase.NewFindLocationByIdUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, locations)
+	c.JSON(http.StatusOK, res)
 }
 
-// FindLocationById godoc
-// @Summary Get a location by ID
-// @Description Get a location by ID
-// @Tags locations
+// FindAllLocationsHandler
+// @Summary Retrieve all Locations
+// @Description Get a list of all Locations
+// @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
-// @Success 200 {object} dto.LocationOutputDTO
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /locations/{id} [get]
-func (h *LocationHandler) FindLocationById(c *gin.Context) {
-	id := c.Param("id")
+// @Success 200 {array} location_usecase.FindAllLocationsOutputDTO
+// @Router /location [get]
+func (h *LocationHandlers) FindAllLocationsHandler(c *gin.Context) {
 	ctx := context.Background()
-
-	var input dto.FindLocationByIdInputDTO
-
-	input.LocationId = id
-
-	location, err := h.findLocationByIdUseCase.Execute(ctx, &input)
+	ctx = context.WithValue(ctx, "limit", c.DefaultQuery("limit", "20"))
+	ctx = context.WithValue(ctx, "offset", c.DefaultQuery("offset", "0"))
+	res, err := location_usecase.NewFindAllLocationsUseCase(h.LocationRepository).Execute(ctx)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, location)
+	c.JSON(http.StatusOK, res)
 }
 
-// UpdateLocation godoc
-// @Summary Update a location
-// @Description Update a location by ID
-// @Tags locations
+// UpdateLocationHandler
+// @Summary Update a Location
+// @Description Update a specific Location entity
+// @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
-// @Param location body dto.CreateLocationInputDTO true "Update Location Input"
-// @Success 200 {object} dto.LocationOutputDTO
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /locations/{id} [put]
-func (h *LocationHandler) UpdateLocation(c *gin.Context) {
-	id := c.Param("id")
-
-	var input dto.UpdateLocationInputDTO
-	if err := c.ShouldBindJSON(&input); err != nil {
+// @Param location_id path string true "Location ID"
+// @Param input body location_usecase.UpdateLocationInputDTO true "Location entity to update"
+// @Success 200 {object} location_usecase.UpdateLocationOutputDTO
+// @Router /location/{location_id} [put]
+func (h *LocationHandlers) UpdateLocationHandler(c *gin.Context) {
+	var input location_usecase.UpdateLocationInputDTO
+	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	input.LocationId = id
-
+	locationId, err := uuid.Parse(c.Param("location_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	input.LocationId = locationId
 	ctx := context.Background()
-	location, err := h.updateLocationUseCase.Execute(ctx, &input)
+	res, err := location_usecase.NewUpdateLocationUseCase(h.LocationRepository).Execute(ctx, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, location)
+	c.JSON(http.StatusOK, res)
 }
 
-// DeleteLocation godoc
-// @Summary Delete a location
-// @Description Delete a location by ID
-// @Tags locations
+// DeleteLocationHandler
+// @Summary Delete a Location
+// @Description Remove a specific Location from the system
+// @Tags Locations
 // @Accept json
 // @Produce json
-// @Param id path string true "Location ID"
-// @Success 204 {object} map[string]string "Success"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /locations/{id} [delete]
-func (h *LocationHandler) DeleteLocation(c *gin.Context) {
-	id := c.Param("id")
-	ctx := context.Background()
-
-	var input dto.DeleteLocationInputDTO
-	input.LocationId = id
-
-	err := h.deleteLocationUseCase.Execute(ctx, &input)
+// @Param location_id path string true "Location ID"
+// @Success 200 {string} string "Location deleted successfully"
+// @Router /location/{location_id} [delete]
+func (h *LocationHandlers) DeleteLocationHandler(c *gin.Context) {
+	var input location_usecase.DeleteLocationInputDTO
+	locationId, err := uuid.Parse(c.Param("location_id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	input.LocationId = locationId
+	ctx := context.Background()
+	err = location_usecase.NewDeleteLocationUseCase(h.LocationRepository).Execute(ctx, input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusNoContent, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"message": "Location deleted successfully"})
 }

@@ -3,7 +3,6 @@ package location_usecase
 import (
 	"context"
 
-	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/dto"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/internal/domain/entity"
 	"github.com/Inteli-College/2024-2A-T02-EC11-G01/pkg/events"
 )
@@ -26,8 +25,8 @@ func NewCreateLocationUseCase(
 	}
 }
 
-func (u *CreateLocationUseCase) Execute(ctx context.Context, input *dto.CreateLocationInputDTO) (*dto.LocationOutputDTO, error) {
-	location, err := entity.NewLocation(&input.Name, &input.CoordinateX, &input.CoordinateY)
+func (u *CreateLocationUseCase) Execute(ctx context.Context, input CreateLocationInputDTO) (*CreateLocationOutputDTO, error) {
+	location, err := entity.NewLocation(input.Name, input.Latitude, input.Longitude)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +35,12 @@ func (u *CreateLocationUseCase) Execute(ctx context.Context, input *dto.CreateLo
 		return nil, err
 	}
 
-	dto := &dto.LocationOutputDTO{
-		LocationId:  res.LocationId.String(),
-		Name:        res.Name,
-		CoordinateX: res.CoordinateX,
-		CoordinateY: res.CoordinateY,
-		CreatedAt:   res.CreatedAt,
+	dto := &CreateLocationOutputDTO{
+		LocationId: res.LocationId,
+		Name:       res.Name,
+		Latitude:   res.Latitude,
+		Longitude:  res.Longitude,
+		CreatedAt:  res.CreatedAt,
 	}
 
 	u.LocationCreated.SetPayload(dto)

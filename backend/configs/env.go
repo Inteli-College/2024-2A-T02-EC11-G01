@@ -1,13 +1,14 @@
 package configs
 
 import (
-	"github.com/spf13/viper"
 	"log"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
 	PostgresUrl     string `mapstructure:"POSTGRES_URL"`
-	RabbitMQChannel string `mapstructure:"RABBITMQ_CHANNEL"`
+	RabbitMQChannel string `mapstructure:"RABBITMQ_URL"`
 }
 
 func LoadConfig(path string) (*Config, error) {
