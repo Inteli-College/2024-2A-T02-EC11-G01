@@ -10,4 +10,4 @@ Este Canvas abrange nove áreas essenciais, desde a definição dos segmentos de
 
 Ao analisar cada seção do Business Model Canvas, podemos compreender melhor como esse projeto está estruturado para atender às demandas de sustentabilidade e conservação ambiental, garantindo um modelo de negócio robusto, escalável e alinhado com as tendências globais de preservação dos ecossistemas florestais.
 
-![Business Model Canvas](../../../static/img/business.png)
+![Business Model Canvas](../../static/img/business.png)
