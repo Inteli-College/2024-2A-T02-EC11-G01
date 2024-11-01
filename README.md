@@ -8,6 +8,17 @@
 
 ## Grupo 1
 
+## Integrantes
+
+- Alberto Miranda
+- Emanuele Morais
+- Filipi Kikuchi
+- Henrique Lemos
+- Henrique Marlon
+- Luana Parra
+- Lyorrei Shono
+- Paulo Evangelista
+
 ## :teacher: Professores:
 ### Orientador(a) 
 - <a href="https://www.linkedin.com/in/rafaelmatsuyama/">Rafael Tsuji Matsuyama</a>
@@ -44,5 +55,5 @@ Este repositório contém várias pastas e arquivos importantes. Aqui está um r
 
 ## 📋 Licença/License
 
-<a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://github.com/Inteli-College/2024-2A-T02-EC11-G01">Inteli</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International</a>. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"></p>
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">EdgeComp</span> by <span property="cc:attributionName">Alberto Miranda, Emanuele Morais, Filipi Kikuchi, Henrique Lemos, Henrique Marlon, Luana Parra, Lyorrei Shono, Paulo Evangelista.</span> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt=""></a></p>
  
